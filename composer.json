@@ -18,5 +18,12 @@
         "psr-4": {
             "CodebyRay\\ReviewRateable\\": "src/"
         }
-    }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Codebyray\\ReviewRateable\\ReviewRateableServiceProvider"
+            ]
+        }
+    },
 }
