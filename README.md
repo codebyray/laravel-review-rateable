@@ -92,7 +92,21 @@ $post->deleteRating(1);
 
 ### Fetch the average rating:
 ````php
+// Get Overall Average Rating
 $post->averageRating()
+
+// Get Customer Service Average Rating
+$post->averageCustomerServiceRating()
+
+// Get Quality Average Rating
+$post->averageQualityRating()
+
+// Get Friendly Average Rating
+$post->averageFriendlyRating()
+
+// Get Price Average Rating
+$post->averagePriceRating()
+
 ````
 
 or

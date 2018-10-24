@@ -207,6 +207,16 @@ trait ReviewRateable
     }
 
     /**
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function getRatings($id)
+    {
+        return (new Rating())->getRatings($id);
+    }
+
+    /**
      * @param $id
      *
      * @return mixed

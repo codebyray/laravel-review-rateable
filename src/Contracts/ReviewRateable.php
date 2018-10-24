@@ -112,5 +112,12 @@ interface ReviewRateable
      * @param $id
      * @return mixed
      */
+    public function getRatings($id);
+
+    /**
+     *
+     * @param $id
+     * @return mixed
+     */
     public function deleteRating($id);
 }

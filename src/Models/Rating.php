@@ -71,6 +71,18 @@ class Rating extends Model
      *
      * @return mixed
      */
+    public function getRatings($id)
+    {
+        $rating = $this->all()->where('reviewrateable_id', $id);
+
+        return $rating;
+    }
+
+    /**
+     * @param $id
+     *
+     * @return mixed
+     */
     public function deleteRating($id)
     {
         return static::find($id)->delete();
