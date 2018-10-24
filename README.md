@@ -115,6 +115,13 @@ or
 $post->averageRating(2) //round to 2 decimal place
 ````
 
+### Get all ratings:
+```php
+$post = Post::first();
+
+$ratings = $post->getAllRatings($post->id);
+```
+
 ### Count total rating:
 ````php
 $post->countRating()

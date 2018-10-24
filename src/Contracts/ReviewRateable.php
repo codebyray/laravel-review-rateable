@@ -110,9 +110,10 @@ interface ReviewRateable
     /**
      *
      * @param $id
+     * @param $sort
      * @return mixed
      */
-    public function getRatings($id);
+    public function getAllRatings($id, $sort = 'desc');
 
     /**
      *

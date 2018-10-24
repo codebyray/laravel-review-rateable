@@ -68,12 +68,15 @@ class Rating extends Model
 
     /**
      * @param $id
-     *
+     * @param $sort
      * @return mixed
      */
-    public function getRatings($id)
+    public function getAllRatings($id, $sort = 'desc')
     {
-        $rating = $this->all()->where('reviewrateable_id', $id);
+        $rating = $this->select('*')
+            ->where('reviewrateable_id', $id)
+            ->orderBy('created_at', $sort)
+            ->get();
 
         return $rating;
     }

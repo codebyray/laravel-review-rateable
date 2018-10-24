@@ -14,7 +14,7 @@ class CreateReviewsTable extends Migration
             $table->integer('quality_rating')->nullable();
             $table->integer('friendly_rating')->nullable();
             $table->integer('price_rating')->nullable();
-            $table->string('recommend', 3)->nullable();
+            $table->enum('recommend', ['Yes', 'No']);
             $table->enum('department', ['Sales', 'Service', 'Parts']);
             $table->string('title');
             $table->string('body');

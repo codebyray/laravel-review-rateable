@@ -209,11 +209,12 @@ trait ReviewRateable
     /**
      *
      * @param $id
+     * @param $sort
      * @return mixed
      */
-    public function getRatings($id)
+    public function getAllRatings($id, $sort = 'desc')
     {
-        return (new Rating())->getRatings($id);
+        return (new Rating())->getAllRatings($id, $sort);
     }
 
     /**
