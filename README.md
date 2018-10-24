@@ -1,5 +1,5 @@
 # Laravel Review Rateable
-Review Rateable system for laravel 5
+Review Rateable system for laravel 5. This package was originally created and forked from https://github.com/Trexology/laravel-reviewRateable.
 
 ## Installation
 
