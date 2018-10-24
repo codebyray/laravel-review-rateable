@@ -1,8 +1,8 @@
 <?php
 
-namespace CodebyRay\ReviewRateable\Test;
+namespace Codebyray\ReviewRateable\Test;
 
-use CodebyRay\ReviewRateable\ReviewRateableServiceProvider;
+use Codebyray\ReviewRateable\ReviewRateableServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra

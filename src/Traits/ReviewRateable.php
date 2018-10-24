@@ -1,9 +1,9 @@
 <?php
 
-namespace CodebyRay\ReviewRateable\Traits;
+namespace Codebyray\ReviewRateable\Traits;
 
 use Illuminate\Database\Eloquent\Model;
-use CodebyRay\ReviewRateable\Models\Rating;
+use Codebyray\ReviewRateable\Models\Rating;
 
 trait ReviewRateable
 {

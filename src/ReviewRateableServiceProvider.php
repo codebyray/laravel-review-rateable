@@ -1,6 +1,6 @@
 <?php
 
-namespace CodebyRay\ReviewRateable;
+namespace Codebyray\ReviewRateable;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -13,9 +13,7 @@ class ReviewRateableServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-	    $this->publishes([
-	        __DIR__.'/../database/migrations/' => database_path('migrations')
-	    ], 'migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
     }
 
     /**

@@ -42,8 +42,8 @@ php artisan migrate
 
 namespace App;
 
-use CodebyRay\ReviewRateable\Contracts\ReviewRateable;
-use CodebyRay\ReviewRateable\Traits\ReviewRateable as ReviewRateableTrait;
+use Codebyray\ReviewRateable\Contracts\ReviewRateable;
+use Codebyray\ReviewRateable\Traits\ReviewRateable as ReviewRateableTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model implements ReviewRateable
@@ -52,7 +52,7 @@ class Post extends Model implements ReviewRateable
 }
 ```
 
-### Create a rating
+### Create a rating``
 ```php
 $user = User::first();
 $post = Post::first();
