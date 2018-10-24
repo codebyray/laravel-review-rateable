@@ -16,17 +16,17 @@ First, pull in the package through Composer.
 composer require codebyray/laravel-review-rateable
 ```
 
-And then include the service provider within `app/config/app.php`.
+And then include the service provider within `app/config/app.php`. Note: If you are running Laravel 5.5+ this will be auto loaded for you.
 
 ```php
 'providers' => [
-    CodebyRay\ReviewRateable\ReviewRateableServiceProvider::class
+    Codebyray\ReviewRateable\ReviewRateableServiceProvider::class
 ];
 ```
 
 At last you need to publish and run the migration.
 ```
-php artisan vendor:publish --provider="CodebyRay\ReviewRateable\ReviewRateableServiceProvider"
+php artisan vendor:publish --provider="Codebyray\ReviewRateable\ReviewRateableServiceProvider"
 ```
 
 Run the migration
