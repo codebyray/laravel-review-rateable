@@ -26,7 +26,7 @@ And then include the service provider within `app/config/app.php`. Note: If you 
 
 At last you need to publish and run the migration.
 ```
-php artisan vendor:publish --provider="Codebyray\ReviewRateable\ReviewRateableServiceProvider"
+php artisan vendor:publish --provider="Codebyray\ReviewRateable\ReviewRateableServiceProvider" --tag="migrations"
 ```
 
 Run the migration
