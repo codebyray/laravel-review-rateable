@@ -1,5 +1,5 @@
 # Laravel Review Rateable
-Review Rateable system for laravel 5. This package was originally created and forked from https://github.com/Trexology/laravel-reviewRateable.
+Review Rateable system for laravel 5.
 
 ## Installation
 
@@ -108,3 +108,9 @@ $post->ratingPercent(10)); // Ten star rating system
 // Note: The value passed in is treated as the maximum allowed value.
 // This defaults to 5 so it can be called without passing a value as well.
 ````
+
+### Note
+This is a fork from Trexology's - [Original Code - laravel-reviewRateable
+](https://github.com/Trexology/laravel-reviewRateable).
+
+Please note that this code is not used in the original and is not maintained.
