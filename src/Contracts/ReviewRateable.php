@@ -108,11 +108,11 @@ interface ReviewRateable
     public function updateRating($id, $data, Model $parent = null);
 
     /**
- *
- * @param $id
- * @param $sort
- * @return mixed
- */
+     *
+     * @param $id
+     * @param $sort
+     * @return mixed
+     */
     public function getAllRatings($id, $sort = 'desc');
 
     /**
