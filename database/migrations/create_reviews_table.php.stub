@@ -8,7 +8,7 @@ class CreateReviewsTable extends Migration
     public function up()
     {
         Schema::create('reviews', function (Blueprint $table) {
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->integer('rating');
             $table->integer('customer_service_rating')->nullable();
             $table->integer('quality_rating')->nullable();
@@ -18,6 +18,7 @@ class CreateReviewsTable extends Migration
             $table->enum('department', ['Sales', 'Service', 'Parts']);
             $table->string('title');
             $table->string('body');
+            $table->boolean('approved')->default(0);
             $table->morphs('reviewrateable');
             $table->morphs('author');
             $table->timestamps();
@@ -26,6 +27,6 @@ class CreateReviewsTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('ratings');
+        Schema::dropIfExists('reviews');
     }
 }

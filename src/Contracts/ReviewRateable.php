@@ -108,12 +108,28 @@ interface ReviewRateable
     public function updateRating($id, $data, Model $parent = null);
 
     /**
+ *
+ * @param $id
+ * @param $sort
+ * @return mixed
+ */
+    public function getAllRatings($id, $sort = 'desc');
+
+    /**
      *
      * @param $id
      * @param $sort
      * @return mixed
      */
-    public function getAllRatings($id, $sort = 'desc');
+    public function getApprovedRatings($id, $sort = 'desc');
+
+    /**
+     *
+     * @param $id
+     * @param $sort
+     * @return mixed
+     */
+    public function getNotApprovedRatings($id, $sort = 'desc');
 
     /**
      *

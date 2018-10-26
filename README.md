@@ -52,7 +52,9 @@ class Post extends Model implements ReviewRateable
 }
 ```
 
-### Create a rating``
+### Create a rating
+When creating a rating you can specify whether the rating is approved or not by adding approved to the array. This is optional and if left 
+out the default is not approved to allow for review before posting.
 ```php
 $user = User::first();
 $post = Post::first();
@@ -66,6 +68,7 @@ $rating = $post->rating([
     'price_rating' => 5,
     'rating' => 5,
     'recommend' => 'Yes',
+    'approved' => true, // This is optional and defaults to false
 ], $user);
 
 dd($rating);
@@ -82,14 +85,29 @@ $rating = $post->updateRating(1, [
     'price_rating' => 4,
     'rating' => 4,
     'recommend' => 'No',
+    'approved' => true, // This is optional and defaults to false
 ]);
 ```
-
+### Marking review as approved
+```php
+$rating = $post->updateRating(1, ['approved' => true]);
+```
 ### Delete a rating:
 ```php
 $post->deleteRating(1);
 ```
 
+### Fetch approved or not approved reviews/ratings for a particular resource
+```php
+// Get not approved ratings
+$ratings = $post->getApprovedRatings($post->id, 'desc');
+
+// Get not approved ratings
+$ratings = $post->getNotApprovedRatings($post->id, 'desc');
+
+// Get all ratings whether approved or not
+$ratings = $post->getAllRatings($post->id, 'desc');
+```
 ### Fetch the average rating:
 ````php
 // Get Overall Average Rating

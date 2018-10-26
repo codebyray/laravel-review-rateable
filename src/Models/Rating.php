@@ -83,6 +83,38 @@ class Rating extends Model
 
     /**
      * @param $id
+     * @param $sort
+     * @return mixed
+     */
+    public function getApprovedRatings($id, $sort = 'desc')
+    {
+        $rating = $this->select('*')
+            ->where('reviewrateable_id', $id)
+            ->where('approved', true)
+            ->orderBy('created_at', $sort)
+            ->get();
+
+        return $rating;
+    }
+
+    /**
+     * @param $id
+     * @param $sort
+     * @return mixed
+     */
+    public function getNotApprovedRatings($id, $sort = 'desc')
+    {
+        $rating = $this->select('*')
+            ->where('reviewrateable_id', $id)
+            ->where('approved', false)
+            ->orderBy('created_at', $sort)
+            ->get();
+
+        return $rating;
+    }
+
+    /**
+     * @param $id
      *
      * @return mixed
      */

@@ -218,6 +218,28 @@ trait ReviewRateable
     }
 
     /**
+     *
+     * @param $id
+     * @param $sort
+     * @return mixed
+     */
+    public function getApprovedRatings($id, $sort = 'desc')
+    {
+        return (new Rating())->getApprovedRatings($id, $sort);
+    }
+
+    /**
+     *
+     * @param $id
+     * @param $sort
+     * @return mixed
+     */
+    public function getNotApprovedRatings($id, $sort = 'desc')
+    {
+        return (new Rating())->getNotApprovedRatings($id, $sort);
+    }
+
+    /**
      * @param $id
      *
      * @return mixed
