@@ -1,5 +1,5 @@
 # Laravel Review Rateable
-Review Rateable system for laravel 5. You can rate your models by:
+Review Rateable system for laravel 5. and 6. You can rate your models by:
 - Overall Rating
 - Customer Service Rating
 - Quality Rating
@@ -60,7 +60,7 @@ $user = User::first();
 $post = Post::first();
 
 $rating = $post->rating([
-    title' => 'This is a test title',
+    'title' => 'This is a test title',
     'body' => 'And we will add some shit here',
     'customer_service_rating' => 5,
     'quality_rating' => 5,
