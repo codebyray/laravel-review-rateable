@@ -65,7 +65,7 @@ $rating = $post->rating([
     'customer_service_rating' => 5,
     'quality_rating' => 5,
     'friendly_rating' => 5,
-    'price_rating' => 5,
+    'pricing_rating' => 5,
     'rating' => 5,
     'recommend' => 'Yes',
     'approved' => true, // This is optional and defaults to false
@@ -82,7 +82,7 @@ $rating = $post->updateRating(1, [
     'customer_service_rating' => 1,
     'quality_rating' => 1,
     'friendly_rating' => 3,
-    'price_rating' => 4,
+    'pricing_rating' => 4,
     'rating' => 4,
     'recommend' => 'No',
     'approved' => true, // This is optional and defaults to false
@@ -107,6 +107,11 @@ $ratings = $post->getNotApprovedRatings($post->id, 'desc');
 
 // Get all ratings whether approved or not
 $ratings = $post->getAllRatings($post->id, 'desc');
+
+// Get the most recent ratings (limit and sort are optional)
+// Limit default is 5, sort default is desc
+$ratings = $post->getRecentRatings($post->id, 5, 'desc');
+
 ```
 ### Fetch the average rating:
 ````php
@@ -123,7 +128,7 @@ $post->averageQualityRating()
 $post->averageFriendlyRating()
 
 // Get Price Average Rating
-$post->averagePriceRating()
+$post->averagePricingRating()
 
 ````
 
