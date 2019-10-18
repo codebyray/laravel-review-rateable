@@ -241,6 +241,17 @@ trait ReviewRateable
 
     /**
      * @param $id
+     * @param $limit
+     * @param $sort
+     * @return mixed
+     */
+    public function getRecentRatings($id, $limit = 5, $sort = 'desc')
+    {
+        return (new Rating())->getRecentRatings($id, $limit,  $sort);
+    }
+
+    /**
+     * @param $id
      *
      * @return mixed
      */
