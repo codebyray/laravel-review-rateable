@@ -133,6 +133,25 @@ class Rating extends Model
 
     /**
      * @param $id
+     * @param $limit
+     * @param $approved
+     * @param $sort
+     * @return mixed
+     */
+    public function getRecentUserRatings($id, $limit = 5, $approved = true, $sort = 'desc')
+    {
+        $rating = $this->select('*')
+            ->where('author_id', $id)
+            ->where('approved', $approved)
+            ->orderBy('created_at', $sort)
+            ->limit($limit)
+            ->get();
+
+        return $rating;
+    }
+
+    /**
+     * @param $id
      *
      * @return mixed
      */
