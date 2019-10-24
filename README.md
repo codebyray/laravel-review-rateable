@@ -112,6 +112,10 @@ $ratings = $post->getAllRatings($post->id, 'desc');
 // Limit default is 5, sort default is desc
 $ratings = $post->getRecentRatings($post->id, 5, 'desc');
 
+// Get the most recent user ratings (limit and sort are optional)
+// Limit default is 5, approved default is true, sort default is desc
+$userRatings = $post->getRecentUserRatings($user->id, 5, true, 'desc');
+
 ```
 ### Fetch the average rating:
 ````php

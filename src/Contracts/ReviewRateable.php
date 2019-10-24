@@ -140,6 +140,15 @@ interface ReviewRateable
     public function getRecentRatings($id, $limit = 5, $sort = 'desc');
 
     /**
+     * @param $id
+     * @param $limit
+     * @param $approved
+     * @param $sort
+     * @return mixed
+     */
+    public function getRecentUserRatings($id, $limit = 5, $approved = true, $sort = 'desc');
+
+    /**
      *
      * @param $id
      * @return mixed
