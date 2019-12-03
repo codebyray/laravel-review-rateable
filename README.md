@@ -99,7 +99,7 @@ $post->deleteRating(1);
 
 ### Fetch approved or not approved reviews/ratings for a particular resource
 ```php
-// Get not approved ratings
+// Get approved ratings
 $ratings = $post->getApprovedRatings($post->id, 'desc');
 
 // Get not approved ratings
@@ -140,6 +140,7 @@ or
 
 ````php
 $post->averageRating(2) //round to 2 decimal place
+$post->averageRating(null, true) //get only approved average rating 
 ````
 
 ### Get all ratings:
