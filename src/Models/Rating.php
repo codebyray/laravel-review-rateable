@@ -150,6 +150,26 @@ class Rating extends Model
         return $rating;
     }
 
+    public function getCollectionByAverageRating($rating)
+    {
+        $ratings = $this->selectRaw('reviewrateable_id as modelId, AVG(rating) as avgRating')
+            ->with($this->reviewrateable())
+            ->groupBy('modelId')
+            ->havingRaw('AVG(rating) >= '.$rating)
+            ->get();
+
+        $ratings = $ratings->mapToGroups(function ($item, $key) {
+            return [$item['name'] => $item['reviewrateable']];
+        });
+
+// Do something to separate the featurable models in each subsection by model type
+        foreach($ratings as $i => $rows) {
+            $ratings[$i] = $rows->groupBy('reviewrateable_type');
+        }
+
+        return $ratings;
+    }
+
     /**
      * @param $id
      *

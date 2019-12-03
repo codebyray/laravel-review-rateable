@@ -148,6 +148,8 @@ interface ReviewRateable
      */
     public function getRecentUserRatings($id, $limit = 5, $approved = true, $sort = 'desc');
 
+    public function getCollectionByAverageRating($rating);
+
     /**
      *
      * @param $id

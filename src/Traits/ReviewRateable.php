@@ -262,6 +262,11 @@ trait ReviewRateable
         return (new Rating())->getRecentUserRatings($id, $limit, $approved, $sort);
     }
 
+    public function getCollectionByAverageRating($rating)
+    {
+        return (new Rating())->getCollectionByAverageRating($rating);
+    }
+
     /**
      * @param $id
      *
