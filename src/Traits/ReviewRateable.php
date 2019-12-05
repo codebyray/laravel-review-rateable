@@ -20,6 +20,7 @@ trait ReviewRateable
      *
      * @param $round
      * @param $onlyApproved
+     *
      * @return mixed
      */
     public function averageRating($round= null, $onlyApproved= false)
@@ -43,6 +44,7 @@ trait ReviewRateable
      *
      * @var $round
      * @var $onlyApproved
+     *
      * @return mixed
      */
     public function averageCustomerServiceRating($round= null, $onlyApproved= false)
@@ -66,6 +68,7 @@ trait ReviewRateable
      *
      * @param $round
      * @param $onlyApproved
+     *
      * @return mixed
      */
     public function averageQualityRating($round = null, $onlyApproved= false)
@@ -89,6 +92,7 @@ trait ReviewRateable
      *
      * @var $round
      * @var $onlyApproved
+     *
      * @return mixed
      */
     public function averageFriendlyRating($round = null, $onlyApproved= false)
@@ -112,9 +116,10 @@ trait ReviewRateable
      *
      * @var $round
      * @var $onlyApproved
+     *
      * @return mixed
      */
-    public function averagePricingRating($round = null, $onlyApproved= false)
+    public function averagePricingRating($round = null, $onlyApproved = false)
     {
         $where = $onlyApproved ? [['approved', '1']] : [];
 
@@ -133,9 +138,10 @@ trait ReviewRateable
 
     /**
      * @var $onlyApproved
+     *
      * @return mixed
      */
-    public function countRating($onlyApproved= false)
+    public function countRating($onlyApproved = false)
     {
       return $this->ratings()
           ->selectRaw('count(rating) as countReviewRateable')
@@ -145,9 +151,10 @@ trait ReviewRateable
 
     /**
      * @var $onlyApproved
+     *
      * @return mixed
      */
-    public function countCustomerServiceRating($onlyApproved= false)
+    public function countCustomerServiceRating($onlyApproved = false)
     {
         return $this->ratings()
             ->selectRaw('count(customer_service_rating) as countCustomerServiceReviewRateable')
@@ -157,9 +164,10 @@ trait ReviewRateable
 
     /**
      * @var $onlyApproved
+     *
      * @return mixed
      */
-    public function countQualityRating($onlyApproved= false)
+    public function countQualityRating($onlyApproved = false)
     {
         return $this->ratings()
             ->selectRaw('count(quality_rating) as countQualityReviewRateable')
@@ -169,9 +177,10 @@ trait ReviewRateable
 
     /**
      * @var $onlyApproved
+     *
      * @return mixed
      */
-    public function countFriendlyRating($onlyApproved= false) {
+    public function countFriendlyRating($onlyApproved = false) {
         return $this->ratings()
             ->selectRaw('count(friendly_rating) as countFriendlyReviewRateable')
             ->where($onlyApproved ? [['approved', '1']] : [])
@@ -180,9 +189,10 @@ trait ReviewRateable
 
     /**
      * @var $onlyApproved
+     *
      * @return mixed
      */
-    public function countPriceRating($onlyApproved= false) {
+    public function countPriceRating($onlyApproved = false) {
         return $this->ratings()
             ->selectRaw('count(price_rating) as countPriceReviewRateable')
             ->where($onlyApproved ? [['approved', '1']] : [])
@@ -191,9 +201,10 @@ trait ReviewRateable
 
     /**
      * @var $onlyApproved
+     *
      * @return mixed
      */
-    public function sumRating($onlyApproved= false)
+    public function sumRating($onlyApproved = false)
     {
         return $this->ratings()
             ->selectRaw('SUM(rating) as sumReviewRateable')
@@ -242,6 +253,7 @@ trait ReviewRateable
      *
      * @param $id
      * @param $sort
+     *
      * @return mixed
      */
     public function getAllRatings($id, $sort = 'desc')
@@ -253,6 +265,7 @@ trait ReviewRateable
      *
      * @param $id
      * @param $sort
+     *
      * @return mixed
      */
     public function getApprovedRatings($id, $sort = 'desc')
@@ -264,6 +277,7 @@ trait ReviewRateable
      *
      * @param $id
      * @param $sort
+     *
      * @return mixed
      */
     public function getNotApprovedRatings($id, $sort = 'desc')
@@ -275,6 +289,7 @@ trait ReviewRateable
      * @param $id
      * @param $limit
      * @param $sort
+     *
      * @return mixed
      */
     public function getRecentRatings($id, $limit = 5, $sort = 'desc')
@@ -287,6 +302,7 @@ trait ReviewRateable
      * @param $limit
      * @param $approved
      * @param $sort
+     *
      * @return mixed
      */
     public function getRecentUserRatings($id, $limit = 5, $approved = true, $sort = 'desc')
@@ -294,9 +310,17 @@ trait ReviewRateable
         return (new Rating())->getRecentUserRatings($id, $limit, $approved, $sort);
     }
 
-    public function getCollectionByAverageRating($rating)
+    /**
+     * @param $rating
+     * @param $type
+     * @param $approved
+     * @param $sort
+     *
+     * @return mixed
+     */
+    public function getCollectionByAverageRating($rating, $type = 'rating', $approved = true, $sort = 'desc')
     {
-        return (new Rating())->getCollectionByAverageRating($rating);
+        return (new Rating())->getCollectionByAverageRating($rating, $approved, $sort);
     }
 
     /**

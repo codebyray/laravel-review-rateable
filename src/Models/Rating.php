@@ -2,6 +2,7 @@
 
 namespace Codebyray\ReviewRateable\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Rating extends Model
@@ -10,6 +11,16 @@ class Rating extends Model
      * @var string
      */
     protected $table = 'reviews';
+
+    /**
+     * @var string
+     */
+    protected $rating;
+
+    /**
+     * @var string
+     */
+    protected $type;
 
     /**
      * @var array
@@ -69,6 +80,7 @@ class Rating extends Model
     /**
      * @param $id
      * @param $sort
+     *
      * @return mixed
      */
     public function getAllRatings($id, $sort = 'desc')
@@ -84,6 +96,7 @@ class Rating extends Model
     /**
      * @param $id
      * @param $sort
+     *
      * @return mixed
      */
     public function getApprovedRatings($id, $sort = 'desc')
@@ -100,6 +113,7 @@ class Rating extends Model
     /**
      * @param $id
      * @param $sort
+     *
      * @return mixed
      */
     public function getNotApprovedRatings($id, $sort = 'desc')
@@ -117,6 +131,7 @@ class Rating extends Model
      * @param $id
      * @param $limit
      * @param $sort
+     *
      * @return mixed
      */
     public function getRecentRatings($id, $limit = 5, $sort = 'desc')
@@ -136,6 +151,7 @@ class Rating extends Model
      * @param $limit
      * @param $approved
      * @param $sort
+     *
      * @return mixed
      */
     public function getRecentUserRatings($id, $limit = 5, $approved = true, $sort = 'desc')
@@ -150,23 +166,26 @@ class Rating extends Model
         return $rating;
     }
 
-    public function getCollectionByAverageRating($rating)
+    /**
+     * @param $rating
+     * @param $type
+     * @param $approved
+     * @param $sort
+     *
+     * @return mixed
+     */
+    public function getCollectionByAverageRating($rating, $type = 'rating', $approved = true, $sort = 'asc')
     {
-        $ratings = $this->selectRaw('reviewrateable_id as modelId, AVG(rating) as avgRating')
-            ->with($this->reviewrateable())
-            ->groupBy('modelId')
-            ->havingRaw('AVG(rating) >= '.$rating)
-            ->get();
+        $this->rating = $rating;
+        $this->type = $type;
 
-        $ratings = $ratings->mapToGroups(function ($item, $key) {
-            return [$item['name'] => $item['reviewrateable']];
-        });
+        $ratings = $this->whereHasMorph('reviewrateable', '*', function (Builder $query) {
+                return $query->groupBy('reviewrateable_id')
+                ->havingRaw('AVG('.$this->type.')  >= '.$this->rating);
+                    })->where('approved', $approved)
+                ->orderBy($type, $sort)->get();
 
-// Do something to separate the featurable models in each subsection by model type
-        foreach($ratings as $i => $rows) {
-            $ratings[$i] = $rows->groupBy('reviewrateable_type');
-        }
-
+        // ddd($ratings);
         return $ratings;
     }
 
