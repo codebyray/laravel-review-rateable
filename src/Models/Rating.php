@@ -55,7 +55,7 @@ class Rating extends Model
         $rating = new static();
         $rating->fill(array_merge($data, [
             'author_id' => $author->id,
-            'author_type' => get_class($author),
+            'author_type' => $author->getMorphClass(),
         ]));
 
         $reviewrateable->ratings()->save($rating);
