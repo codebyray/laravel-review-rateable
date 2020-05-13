@@ -1,5 +1,5 @@
 {
-    "name": "codebyray/laravel-review-rateable",
+    "name": "sundarocs/laravel-review-rateable",
     "description": "Review & Rating system for Laravel 5",
     "keywords": ["rating", "Ratable", "laravel", "Review-Rateable", "reviewable"],
     "license": "MIT",
