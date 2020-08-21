@@ -13,7 +13,7 @@ You can also set whether the model being rated is recommended.
 First, pull in the package through Composer.
 
 ```
-composer require sundarocs/laravel-review-rateable
+composer require codebyray/laravel-review-rateable
 ```
 
 And then include the service provider within `app/config/app.php`. Note: If you are running Laravel 5.5+ this will be auto loaded for you.
