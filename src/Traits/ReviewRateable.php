@@ -210,7 +210,7 @@ trait ReviewRateable
     {
         $ratings = $this->ratings();
         $quantity = $ratings->count();
-        $total = $ratings->selectRaw('SUM(rating) as total')->pluck('total');
+        $total = $ratings->selectRaw('SUM(rating) as total')->get()->first()->total;
         return ($quantity * $max) > 0 ? $total / (($quantity * $max) / 100) : 0;
     }
 
@@ -302,5 +302,15 @@ trait ReviewRateable
     public function deleteRating($id)
     {
         return (new Rating())->deleteRating($id);
+    }
+
+    /**
+     * @param $id
+     *
+     * @return mixed
+     */
+    public function getUserRatings($id, $author, $sort = 'desc')
+    {
+        return (new Rating())->getUserRatings($id, $author, $sort = 'desc');
     }
 }
