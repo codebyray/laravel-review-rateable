@@ -85,6 +85,7 @@ interface ReviewRateable
     /**
      *
      * @param $max
+     *
      * @return mixed
      */
     public function ratingPercent($max = 5);
@@ -94,6 +95,7 @@ interface ReviewRateable
      * @param $data
      * @param $author
      * @param $parent
+     *
      * @return mixed
      */
     public function rating($data, Model $author, Model $parent = null);
@@ -103,6 +105,7 @@ interface ReviewRateable
      * @param $id
      * @param $data
      * @param $parent
+     *
      * @return mixed
      */
     public function updateRating($id, $data, Model $parent = null);
@@ -111,6 +114,7 @@ interface ReviewRateable
      *
      * @param $id
      * @param $sort
+     *
      * @return mixed
      */
     public function getAllRatings($id, $sort = 'desc');
@@ -119,6 +123,7 @@ interface ReviewRateable
      *
      * @param $id
      * @param $sort
+     *
      * @return mixed
      */
     public function getApprovedRatings($id, $sort = 'desc');
@@ -127,6 +132,7 @@ interface ReviewRateable
      *
      * @param $id
      * @param $sort
+     *
      * @return mixed
      */
     public function getNotApprovedRatings($id, $sort = 'desc');
@@ -135,6 +141,7 @@ interface ReviewRateable
      * @param $id
      * @param $limit
      * @param $sort
+     *
      * @return mixed
      */
     public function getRecentRatings($id, $limit = 5, $sort = 'desc');
@@ -144,13 +151,25 @@ interface ReviewRateable
      * @param $limit
      * @param $approved
      * @param $sort
+     *
      * @return mixed
      */
     public function getRecentUserRatings($id, $limit = 5, $approved = true, $sort = 'desc');
 
     /**
+     * @param $rating
+     * @para $type
+     * @param $approved
+     * @param $sort
+     *
+     * @return mixed
+     */
+    public function getCollectionByAverageRating($rating, $type = 'rating', $approved = true, $sort = 'desc');
+
+    /**
      *
      * @param $id
+     *
      * @return mixed
      */
     public function deleteRating($id);

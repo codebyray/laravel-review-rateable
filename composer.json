@@ -1,6 +1,6 @@
 {
     "name": "codebyray/laravel-review-rateable",
-    "description": "Review & Rating system for Laravel 7",
+    "description": "Review & Rating system for Laravel 7 & 8",
     "keywords": ["rating", "Ratable", "laravel", "Review-Rateable", "reviewable"],
     "license": "MIT",
     "authors": [
