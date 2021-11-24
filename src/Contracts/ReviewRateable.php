@@ -173,4 +173,11 @@ interface ReviewRateable
      * @return mixed
      */
     public function deleteRating($id);
+
+    /**
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function getUserRatings($id, $author, $sort = 'desc');
 }

@@ -198,4 +198,19 @@ class Rating extends Model
     {
         return static::find($id)->delete();
     }
+
+    /**
+     * @param $id
+     *
+     * @return mixed
+     */
+    public function getUserRatings($id, $author, $sort = 'desc')
+    {
+        $rating = $this->where('reviewrateable_id', $id)
+                ->where('author_id', $author)
+                ->orderBy('id', $sort)
+                ->firstOrFail();
+
+        return $rating;
+    }
 }
