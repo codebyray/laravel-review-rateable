@@ -1,5 +1,5 @@
 # Laravel Review Rateable
-Review Rateable system for laravel 5. and 6. You can rate your models by:
+Review Rateable system for laravel 5, 6, 7 & 8. You can rate your models by:
 - Overall Rating
 - Customer Service Rating
 - Quality Rating
