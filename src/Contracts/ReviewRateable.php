@@ -14,71 +14,71 @@ interface ReviewRateable
     /**
      *
      * @param $round
-     * @return mixed
+     * @return double
      */
     public function averageRating($round = null);
 
     /**
      *
      * @param $round
-     * @return mixed
+     * @return double
      */
     public function averageCustomerServiceRating($round = null);
 
     /**
      *
      * @param $round
-     * @return mixed
+     * @return double
      */
     public function averageQualityRating($round = null);
 
     /**
      *
      * @param $round
-     * @return mixed
+     * @return double
      */
     public function averageFriendlyRating($round = null);
 
     /**
      *
      * @param $round
-     * @return mixed
+     * @return double
      */
     public function averagePricingRating($round = null);
 
     /**
      *
-     * @return mixed
+     * @return int
      */
     public function countRating();
 
     /**
      *
-     * @return mixed
+     * @return int
      */
     public function countCustomerServiceRating();
 
     /**
      *
-     * @return mixed
+     * @return int
      */
     public function countQualityRating();
 
     /**
      *
-     * @return mixed
+     * @return int
      */
     public function countFriendlyRating();
 
     /**
      *
-     * @return mixed
+     * @return int
      */
     public function countPriceRating();
 
     /**
      *
-     * @return mixed
+     * @return double
      */
     public function sumRating();
 
@@ -86,7 +86,7 @@ interface ReviewRateable
      *
      * @param $max
      *
-     * @return mixed
+     * @return double
      */
     public function ratingPercent($max = 5);
 
@@ -96,7 +96,7 @@ interface ReviewRateable
      * @param $author
      * @param $parent
      *
-     * @return mixed
+     * @return static
      */
     public function rating($data, Model $author, Model $parent = null);
 
