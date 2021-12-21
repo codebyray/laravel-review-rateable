@@ -296,9 +296,9 @@ trait ReviewRateable
      *
      * @return mixed
      */
-    public function getAllRatings($id, $paginate = false, $perPage = 5, $sort = 'desc')
+    public function getAllRatings($id, $sort = 'desc')
     {
-        return (new Rating())->getAllRatings($id, $paginate, $perPage, $sort);
+        return (new Rating())->getAllRatings($id, $sort);
     }
 
     /**

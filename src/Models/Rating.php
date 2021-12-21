@@ -83,19 +83,13 @@ class Rating extends Model
      *
      * @return mixed
      */
-    public function getAllRatings($id, $paginate, $perPage, $sort = 'desc')
+    public function getAllRatings($id, $sort = 'desc')
     {
-        if($paginate){
-            $rating = $this->select('*')
-            ->where('reviewrateable_id', $id)
-            ->orderBy('created_at', $sort)
-            ->paginate($perPage);
-        }else{
-            $rating = $this->select('*')
+        $rating = $this->select('*')
             ->where('reviewrateable_id', $id)
             ->orderBy('created_at', $sort)
             ->get();
-        }
+
         return $rating;
     }
 
