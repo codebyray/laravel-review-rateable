@@ -228,7 +228,7 @@ trait ReviewRateable
         $where = $onlyApproved ? [['approved', '1']] : [];
 
         return $this->ratings()
-            ->selectRaw('count(price_rating) as countPriceReviewRateable')
+            ->selectRaw('count(pricing_rating) as countPriceReviewRateable')
             ->where($where)
             ->get()
             ->first()
@@ -296,9 +296,9 @@ trait ReviewRateable
      *
      * @return mixed
      */
-    public function getAllRatings($id, $sort = 'desc')
+    public function getAllRatings($id, $paginate = false, $perPage = 5, $sort = 'desc')
     {
-        return (new Rating())->getAllRatings($id, $sort);
+        return (new Rating())->getAllRatings($id, $paginate, $perPage, $sort);
     }
 
     /**
