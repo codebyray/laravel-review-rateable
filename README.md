@@ -1,4 +1,8 @@
 # Laravel Review Rateable
+<img alt="Packagist Downloads" src="https://img.shields.io/packagist/dt/codebyray/laravel-review-rateable">
+<img alt="GitHub" src="https://img.shields.io/github/license/codebyray/laravel-review-rateable">
+<img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/codebyray/laravel-review-rateable">
+
 Review Rateable system for laravel 6, 7, 8 & 9. You can rate your models by:
 - Overall Rating
 - Customer Service Rating
