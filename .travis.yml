@@ -31,7 +31,7 @@ before_script:
   - if [ "$LARAVEL_VERSION" != "" ]; then composer require --dev "laravel/laravel:${LARAVEL_VERSION}" --prefer-dist; fi;  
   - travis_retry composer update
 
- cache:
+cache:
   directories:
     - vendor
 
