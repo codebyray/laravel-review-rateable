@@ -382,14 +382,4 @@ trait ReviewRateable
     {
         return (new Rating())->getUserRatings($id, $author, $sort = 'desc');
     }
-
-    /**
-     * @param $id
-     *
-     * @return mixed
-     */
-    public function averageRatingForAll($round = null, $onlyApproved = false)
-    {
-        return (new Rating())->getAverageRatingForAll($round, $onlyApproved);
-    }
 }
