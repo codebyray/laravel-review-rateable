@@ -213,4 +213,28 @@ class Rating extends Model
 
         return $rating;
     }
+
+    /**
+     * @param $id
+     *
+     * @return mixed
+     */
+    public function getAverageRatingForAll($round = null, $onlyApproved = false)
+    {
+        $where = $onlyApproved ? [['approved', '1']] : [];
+        $avgExpression = null;
+
+        if ($round) {
+            $avgExpression = 'ROUND(AVG(rating), ' . $round . ') as averageReviewRateable';
+        } else {
+            $avgExpression = 'AVG(rating) as averageReviewRateable';
+        }
+
+        return $this->ratings()
+            ->selectRaw($avgExpression)
+            ->where($where)
+            ->get()
+            ->first()
+            ->averageReviewRateable;
+    }
 }

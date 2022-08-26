@@ -180,4 +180,11 @@ interface ReviewRateable
      * @return mixed
      */
     public function getUserRatings($id, $author, $sort = 'desc');
+
+    /**
+     *
+     * @param $round
+     * @return double
+     */
+    public function averageRatingForAll($round = null);
 }
