@@ -17,7 +17,7 @@ trait ReviewRateable
         return config('reviewrateable.default_rating_types');
     }
 
-    public function addReview($data, $author)
+    public function addReview(array $data, Model $author)
     {
         // Separate ratings from other data
         $ratings = [];
