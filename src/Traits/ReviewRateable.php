@@ -15,7 +15,7 @@ trait ReviewRateable
 
     public function ratingTypes(): array
     {
-        return config('reviewrateable.default_rating_types');
+        return config('review-rateable.default_rating_types');
     }
 
     public function addReview(array $data, Model $author)
