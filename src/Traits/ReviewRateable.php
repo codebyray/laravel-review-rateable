@@ -15,7 +15,7 @@ trait ReviewRateable
 
     public function ratingTypes(): array
     {
-        return config('review-rateable.default_rating_types');
+        return config('review-ratable.default_rating_types');
     }
 
     public function addReview(array $data, Model $author)
@@ -33,7 +33,7 @@ trait ReviewRateable
         // Create review
         $data['author_id'] = $author->id;
         $data['author_type'] = get_class($author);
-        $data['approved'] = $data['approved'] ?? config('review-rateable.default_approved', false);
+        $data['approved'] = $data['approved'] ?? config('review-ratable.default_approved', false);
         $review = new Review($data);
         $this->reviews()->save($review);
 

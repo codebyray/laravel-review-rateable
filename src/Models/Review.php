@@ -49,8 +49,8 @@ class Review extends Model
 
     public function addRating($type, $rating)
     {
-        $max = config('reviewrateable.max_rating_value');
-        $min = config('reviewrateable.min_rating_value');
+        $max = config('review-ratable.max_rating_value');
+        $min = config('review-ratable.min_rating_value');
 
         if ($rating >= $min && $rating <= $max) {
             $ratings = $this->ratings;
