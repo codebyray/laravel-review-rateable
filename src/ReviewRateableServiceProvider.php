@@ -19,7 +19,7 @@ class ReviewRateableServiceProvider extends ServiceProvider
         ], 'migrations');
 
         $this->publishes([
-            __DIR__.'/../config/review-rateable.php' => config_path('review-ratable.php'),
+            __DIR__.'/../config/review-ratable.php' => config_path('review-ratable.php'),
         ], 'config');
     }
 
