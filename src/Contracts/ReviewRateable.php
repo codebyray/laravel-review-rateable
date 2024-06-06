@@ -26,7 +26,7 @@ interface ReviewRateable
      * @param array $data
      * @return \Illuminate\Database\Eloquent\Model
      */
-    public function addReview(array $data);
+    public function addReview(array $data, Model $author);
 
     /**
      * Add a rating to a specific review.
