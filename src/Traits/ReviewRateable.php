@@ -3,6 +3,7 @@
 namespace Codebyray\ReviewRateable\Traits;
 
 use Codebyray\ReviewRateable\Models\Review;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait ReviewRateable
