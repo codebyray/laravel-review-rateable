@@ -17,11 +17,25 @@ trait ReviewRateable
         return config('reviewrateable.default_rating_types');
     }
 
-    public function addReview($data)
+    public function addReview($data, $author)
     {
-        $data['approved'] = config('reviewrateable.default_approved', false);
+        // Separate ratings from other data
+        $ratings = [];
+        foreach ($this->ratingTypes() as $type) {
+            if (isset($data["{$type}_rating"])) {
+                $ratings[$type] = $data["{$type}_rating"];
+                unset($data["{$type}_rating"]);
+            }
+        }
+        $data['ratings'] = $ratings;
+
+        // Create review
+        $data['author_id'] = $author->id;
+        $data['author_type'] = get_class($author);
+        $data['approved'] = $data['approved'] ?? config('review-rateable.default_approved', false);
         $review = new Review($data);
         $this->reviews()->save($review);
+
         return $review;
     }
 
