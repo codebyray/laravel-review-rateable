@@ -17,6 +17,10 @@ class ReviewRateableServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../database/migrations/create_reviews_table.php.stub' => $this->app->databasePath()."/migrations/{$timestamp}_create_reviews_table.php",
         ], 'migrations');
+
+        $this->publishes([
+            __DIR__.'/../config/review-rateable.php' => config_path('review-ratable.php'),
+        ], 'config');
     }
 
     /**
@@ -26,5 +30,8 @@ class ReviewRateableServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/review-ratable.php', 'review-ratable'
+        );
     }
 }
