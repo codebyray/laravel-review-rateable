@@ -98,18 +98,18 @@ return [
 
 ## Usage
 ### Making a Model Reviewable
-To allow a model to be reviewed, add the ``ReviewRatable`` trait to your model. For example, in your ``Product`` model:
+To allow a model to be reviewed, add the ``ReviewRateable`` trait to your model. For example, in your ``Product`` model:
 ```php
 <?php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use CodeByRay\LaravelReviewRatable\Traits\ReviewRatable;
+use Codebyray\ReviewRateable\Traits\ReviewRateable;
 
 class Product extends Model
 {
-    use ReviewRatable;
+    use ReviewRateable;
 }
 ```
 ### Adding a Review
@@ -119,14 +119,14 @@ $product = Product::find(1);
 
 $product->addReview([
     'review'     => 'Great product! The quality is superb and customer service was excellent.',
-    'department' => 'sales', // Optional, defaults to 'default'
-    'recommend'  => true, // Whether the user would recommend the product being reviewed
-    'approved'   => true, // Optionally override default approval (false) by providing 'approved'
+    'department' => 'sales',   // Optional, defaults to 'default'
+    'recommend'  => true,      // Whether the user would recommend the product being reviewed
+    'approved'   => true,      // Optionally override default (false) approval by providing 'approved'
     'ratings'    => [
-        'overall'        => 'Overall Rating',
-        'communication'  => 'Communication Rating',
-        'follow_up'      => 'Follow-Up Rating',
-        'price'          => 'Price Rating',
+        'overall'        => 5,
+        'communication'  => 5,
+        'follow_up'      => 5,
+        'price'          => 5,
     ],
 ], auth()->id());
 ```
