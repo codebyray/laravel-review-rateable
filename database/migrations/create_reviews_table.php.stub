@@ -1,23 +1,21 @@
 <?php
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateReviewsTable extends Migration
 {
     public function up()
     {
         Schema::create('reviews', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->integer('rating');
-            $table->json('ratings')->nullable();
-            $table->json('departments')->nullable();
-            $table->enum('recommend', ['Yes', 'No']);
-            $table->string('title');
-            $table->string('body');
-            $table->boolean('approved')->default(0);
-            $table->morphs('reviewrateable');
-            $table->morphs('author');
+            $table->id();
+            $table->morphs('reviewable');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->text('review')->nullable();
+            $table->string('department')->default('default');
+            $table->boolean('recommend')->default(false);
+            $table->boolean('approved')->default(false);
             $table->timestamps();
         });
     }
@@ -27,3 +25,4 @@ class CreateReviewsTable extends Migration
         Schema::dropIfExists('reviews');
     }
 }
+
