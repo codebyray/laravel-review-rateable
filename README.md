@@ -120,13 +120,13 @@ $product = Product::find(1);
 $product->addReview([
     'review'     => 'Great product! The quality is superb and customer service was excellent.',
     'department' => 'sales', // Optional, defaults to 'default'
-    'recommend'  => true,
+    'recommend'  => true, // Whether the user would recommend the product being reviewed
     'approved'   => true, // Optionally override default approval (false) by providing 'approved'
     'ratings'    => [
-        'overall'          => 5,
-        'customer_service' => 4,
-        'quality'          => 5,
-        'price'            => 4,
+        'overall'        => 'Overall Rating',
+        'communication'  => 'Communication Rating',
+        'follow_up'      => 'Follow-Up Rating',
+        'price'          => 'Price Rating',
     ],
 ], auth()->id());
 ```

@@ -42,7 +42,6 @@ return [
                 'customer_service' => 'Customer Service Rating',
                 'quality'          => 'Quality Rating',
                 'price'            => 'Price Rating',
-                'recommendation'   => 'Would Recommend?',
             ],
         ],
         'sales' => [
@@ -50,7 +49,7 @@ return [
                 'overall'        => 'Overall Rating',
                 'communication'  => 'Communication Rating',
                 'follow_up'      => 'Follow-Up Rating',
-                'recommendation' => 'Would Recommend?',
+                'price'          => 'Price Rating',
             ],
         ],
         'support' => [
@@ -58,7 +57,6 @@ return [
                 'overall'        => 'Overall Rating',
                 'speed'          => 'Response Speed',
                 'knowledge'      => 'Knowledge Rating',
-                'recommendation' => 'Would Recommend?',
             ],
         ],
     ],
