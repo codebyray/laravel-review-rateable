@@ -24,6 +24,23 @@ interface ReviewRateableContract
     public function addReview(array $data, ?int $userId = null): mixed;
 
     /**
+     * Update a review by its ID.
+     *
+     * @param int   $reviewId
+     * @param array $data
+     * @return bool
+     */
+    public function updateReview(int $reviewId, array $data): bool;
+
+    /**
+     * Mark a review as approved by its ID.
+     *
+     * @param int $reviewId
+     * @return bool
+     */
+    public function approveReview(int $reviewId): bool;
+
+    /**
      * Get the average rating for a given key.
      *
      * @param string $key
@@ -83,4 +100,13 @@ interface ReviewRateableContract
      * @return float|null
      */
     public function overallAverageRating(bool $approved = true): ?float;
+
+    /**
+     * Delete a review.
+     *
+     * @param int $reviewId
+     * @return bool
+     */
+    public function deleteReview(int $reviewId): bool;
+
 }

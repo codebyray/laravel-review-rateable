@@ -133,46 +133,79 @@ $product->addReview([
 
 ### Update a rating
 ```php
-// In Progress
+// Retrieve the product you want to update the review for.
+$product = Product::findOrFail(1);
+
+// Prepare the updated data.
+$data = [
+    'review'     => 'Updated review text',    // New review text.
+    'department' => 'default',     // Optionally, change the department.
+    'recommend'  => false,         // Update recommendation flag.
+    'approved'   => true,          // Update approval status if needed.
+    'ratings'    => [
+        'overall'        => 4,
+        'communication'  => 3,
+        'follow_up'      => 4,
+        'price'          => 2,
+    ],
+];
+
+// Call the updateReview method on the product.
+$product->updateReview($reviewId, $data);
 ```
 ### Marking review as approved
 ```php
-// Inm progress
+// Retrieve the product you want to mark as approved
+$product = Product::findOrFail(1);
+
+// Approve th review
+$product->approveReview($reviewId);
 ```
-### Delete a rating:
+### Delete a review/rating:
 ```php
-// Inm progress
+// Retrieve the product with the review you want to delete
+$product = Product::findOrFail(1);
+
+// Delete the review
+$product->deleteReview($reviewId);
 ```
 
 ### Fetch approved or not approved reviews/ratings for a particular resource
 ```php
-// Inm progress
+// Approved reviews with ratings
+$product = Product::findOrFail($postId);
+
+// Get approved reviews (with related ratings)
+// Default: approved = true, withRatings = true
+$product->getReviews();
+
+// Get not approved reviews (with related ratings)
+$product->getReviews(false);
+$product->getReviews(approved: false);
+
+// Get approved reviews (without related ratings)
+$product->getReviews(true, false);
+$product->getReviews(withRatings: false);
 ```
 ### Fetch the average rating:
 ````php
-// Inm progress
+// In progress
 ````
 
 or
 
 ````php
-// Inm progress
+// In progress
 ````
 
 ### Get all ratings:
 ```php
-// Inm progress
+// In progress
 ```
 
 ### Count total rating:
 ````php
-// Inm progress
-````
-
-### Fetch the rating percentage.
-This is also how you enforce a maximum rating value.
-````php
-// Inm progress
+// In progress
 ````
 
 ### Notes

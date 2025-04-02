@@ -53,6 +53,34 @@ class ReviewRateableService implements ReviewRateableContract
     }
 
     /**
+     * Update a review and its ratings by review ID.
+     *
+     * The $data array can include:
+     *  - 'review': New review text.
+     *  - 'department': New department key.
+     *  - 'recommend': New recommendation flag.
+     *  - 'approved': New approval status.
+     *  - 'ratings': An associative array of rating values (key => value).
+     *
+     * @param int $reviewId
+     * @param array $data
+     * @return bool  True on success, false if the review was not found.
+     * @throws Exception
+     */
+    public function updateReview(int $reviewId, array $data): bool
+    {
+        return $this->getModel()->updateReview($reviewId, $data);
+    }
+
+    /**
+     * Delegate approving a review.
+     */
+    public function approveReview(int $reviewId): bool
+    {
+        return $this->getModel()->approveReview($reviewId);
+    }
+
+    /**
      * Delegate averageRating calculation to the model.
      *
      * @param string $key
@@ -140,4 +168,15 @@ class ReviewRateableService implements ReviewRateableContract
     {
         return $this->getModel()->overallAverageRating($approved);
     }
+
+    /**
+     * @param int $reviewId
+     * @return bool
+     * @throws Exception
+     */
+    public function deleteReview(int $reviewId): bool
+    {
+        return $this->getModel()->deleteReview($reviewId);
+    }
+
 }

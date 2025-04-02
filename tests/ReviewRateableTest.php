@@ -2,6 +2,7 @@
 
 namespace Codebyray\ReviewRateable\Tests;
 
+use Codebyray\ReviewRateable\Models\Review;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
@@ -53,6 +54,121 @@ $dummyModel = new class extends Model {
     protected $table = 'dummy_models';
     protected $guarded = [];
 };
+
+it('adds a review with ratings successfully', function () use ($dummyModel) {
+    // Create an instance of the dummy model.
+    $instance = $dummyModel::create(['name' => 'Test Add Review']);
+
+    // Add a review with multiple ratings.
+    $review = $instance->addReview(
+        [
+            'review' => 'This is a test review.',
+            'department' => 'default',
+            'recommend' => true,
+            'approved' => true,
+            'ratings' => [
+              'overall' => 5,
+              'customer_service' => 4,
+              'quality' => 5,
+              'price' => 3,
+            ],
+        ], 1
+    );
+
+    // Assert the review is an instance of the Review model.
+    expect($review)->toBeInstanceOf(Review::class)
+        ->and($review->review)->toEqual('This is a test review.')
+        ->and($review->approved)->toBeTrue();
+
+    // Verify that ratings are attached.
+    $ratings = $review->ratings;
+    expect($ratings)->toHaveCount(4);
+
+    $overall = $ratings->firstWhere('key', 'overall');
+    expect($overall->value)->toEqual(5);
+});
+
+it('adds a review without ratings successfully', function () use ($dummyModel) {
+    // Create an instance of the dummy model.
+    $instance = $dummyModel::create(['name' => 'Test Add Review']);
+
+    // Add a review with multiple ratings.
+    $review = $instance->addReview(
+        [
+            'review' => 'This is a test review.',
+            'department' => 'default',
+            'recommend' => true,
+            'approved' => true,
+        ], 1
+    );
+
+    // Assert the review is an instance of the Review model.
+    expect($review)->toBeInstanceOf(Review::class)
+        ->and($review->review)->toEqual('This is a test review.')
+        ->and($review->approved)->toBeTrue();
+
+    // Verify that ratings are not attached.
+    $ratings = $review->ratings;
+    expect($ratings)->toHaveCount(0);
+});
+
+it('updates a review and its ratings successfully', function () use ($dummyModel) {
+    // Create a dummy model instance.
+    $instance = $dummyModel::create(['name' => 'Test Update']);
+
+    // Add an approved review with a rating.
+    $review = $instance->addReview(
+        [
+            'review'   => 'Original review text',
+            'approved' => true,
+            'ratings'  => [
+                'overall' => 5,
+            ],
+        ]
+    );
+
+    // Update the review text and the rating.
+    $updateData = [
+        'review' => 'Updated review text',
+        'ratings' => [
+            'overall' => 4,
+        ],
+    ];
+
+    $updated = $instance->updateReview($review->id, $updateData);
+    expect($updated)->toBeTrue();
+
+    $updatedReview = $instance->reviews()->find($review->id);
+    expect($updatedReview->review)->toEqual('Updated review text')
+        ->and($updatedReview->ratings()->first()->value)->toEqual(4);
+});
+
+it('approves a review successfully', function () use ($dummyModel) {
+    // Create a dummy model instance.
+    $instance = $dummyModel::create(['name' => 'Test Approve']);
+
+    // Add a review that is initially not approved.
+    $review = $instance->addReview(
+        [
+            'review'   => 'Review pending approval',
+            'approved' => false,
+            'ratings'  => [
+                'overall' => 4,
+            ],
+        ]
+    );
+
+    // Verify that the review is not approved initially.
+    expect($review->approved)->toBeFalse();
+
+    // Call the approveReview method.
+    $result = $instance->approveReview($review->id);
+    expect($result)->toBeTrue();
+
+    // Retrieve the review from the database and verify that it's approved.
+    $approvedReview = $instance->reviews()->find($review->id);
+    expect((bool)$approvedReview->approved)->toBeTrue();
+});
 
 it('retrieves approved reviews with ratings by default', function () use ($dummyModel) {
     // Create a dummy model instance.
@@ -160,4 +276,24 @@ it('allows service getReviews to delegate with parameters correctly', function (
     // Retrieve reviews without eager loading ratings.
     $reviewsWithout = $dummyInstance->getReviews(true, false);
     expect($reviewsWithout->first()->relationLoaded('ratings'))->toBeFalse();
+});
+
+it('deletes a review successfully', function () use ($dummyModel) {
+    // Create an instance of the dummy model.
+    $dummyInstance = $dummyModel::create(['name' => 'Test Delete']);
+
+    // Add an approved review with ratings.
+    $review = $dummyInstance->addReview(
+        [
+            'review'   => 'Review to delete',
+            'approved' => true,
+            'ratings'  => [
+                'overall' => 5,
+            ],
+        ]
+    );
+
+    // Delete the review by its ID.
+    $deleted = $dummyInstance->deleteReview($review->id);
+    expect($deleted)->toBeTrue();
 });

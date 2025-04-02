@@ -80,10 +80,98 @@ trait ReviewRateable
     }
 
     /**
+     * Update a review and its ratings by review ID.
+     *
+     * The $data array can include:
+     *  - 'review': New review text.
+     *  - 'department': New department key.
+     *  - 'recommend': New recommendation flag.
+     *  - 'approved': New approval status.
+     *  - 'ratings': An associative array of rating values (key => value).
+     *
+     * @param int   $reviewId
+     * @param array $data
+     * @return bool  True on success, false if the review was not found.
+     */
+    public function updateReview(int $reviewId, array $data): bool
+    {
+        $review = $this->reviews()->find($reviewId);
+
+        if (!$review) {
+            return false;
+        }
+
+        // Prepare attributes for the review update.
+        $attributes = [];
+        if (isset($data['review'])) {
+            $attributes['review'] = $data['review'];
+        }
+        if (isset($data['department'])) {
+            $attributes['department'] = $data['department'];
+        }
+        if (isset($data['recommend'])) {
+            $attributes['recommend'] = $data['recommend'];
+        }
+        if (isset($data['approved'])) {
+            $attributes['approved'] = $data['approved'];
+        }
+        if (!empty($attributes)) {
+            $review->update($attributes);
+        }
+
+        // Update ratings if provided.
+        if (isset($data['ratings']) && is_array($data['ratings'])) {
+            // Determine which department's rating keys to use.
+            $department = $attributes['department'] ?? $review->department;
+            $departments = config('review-rateable.departments', []);
+            $configRatings = $departments[$department]['ratings'] ?? [];
+
+            // Get global min and max rating values.
+            $min = config('review-rateable.min_rating_value', 1);
+            $max = config('review-rateable.max_rating_value', 10);
+
+            foreach ($data['ratings'] as $key => $value) {
+                if ($value < $min) {
+                    $value = $min;
+                } elseif ($value > $max) {
+                    $value = $max;
+                }
+
+                $rating = $review->ratings()->where('key', $key)->first();
+                if ($rating) {
+                    $rating->update(['value' => $value]);
+                } else {
+                    if (array_key_exists($key, $configRatings)) {
+                        $review->ratings()->create(['key' => $key, 'value' => $value]);
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Mark a review as approved by its ID.
+     *
+     * @param int $reviewId
+     * @return bool True if the update was successful, false if the review was not found.
+     */
+    public function approveReview(int $reviewId): bool
+    {
+        $review = $this->reviews()->find($reviewId);
+        if (!$review) {
+            return false;
+        }
+        return $review->update(['approved' => true]);
+    }
+
+    /**
      * Get all reviews (with attached ratings) for the model,
      * filtered by the approved status.
      *
-     * @param  bool  $approved
+     * @param bool $approved
+     * @param bool $withRatings
      * @return Collection
      */
     public function getReviews(bool $approved = true, bool $withRatings = true): Collection
@@ -238,4 +326,22 @@ trait ReviewRateable
 
         return $ratings->avg('value');
     }
+
+    /**
+     * Delete a review by its ID.
+     *
+     * @param int $reviewId
+     * @return bool True if the review was deleted, false otherwise.
+     */
+    public function deleteReview(int $reviewId): bool
+    {
+        $review = $this->reviews()->find($reviewId);
+
+        if ($review) {
+            return $review->delete();
+        }
+
+        return false;
+    }
+
 }
