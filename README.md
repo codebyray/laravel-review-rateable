@@ -112,10 +112,10 @@ class Product extends Model
     use ReviewRateable;
 }
 ```
-### Adding a Review
+### Adding a review/rating(s)
 You can add a review (with ratings) directly via the trait:
 ```php
-$product = Product::find(1);
+$product = Product::find($productId);
 
 $product->addReview([
     'review'     => 'Great product! The quality is superb and customer service was excellent.',
@@ -131,10 +131,10 @@ $product->addReview([
 ], auth()->id());
 ```
 
-### Update a rating
+### Update a review/rating(s)
 ```php
 // Retrieve the product you want to update the review for.
-$product = Product::findOrFail(1);
+$product = Product::findOrFail($productId);
 
 // Prepare the updated data.
 $data = [
@@ -156,7 +156,7 @@ $product->updateReview($reviewId, $data);
 ### Marking review as approved
 ```php
 // Retrieve the product you want to mark as approved
-$product = Product::findOrFail(1);
+$product = Product::findOrFail($productId);
 
 // Approve th review
 $product->approveReview($reviewId);
@@ -173,7 +173,7 @@ $product->deleteReview($reviewId);
 ### Fetch approved or not approved reviews/ratings for a particular resource
 ```php
 // Approved reviews with ratings
-$product = Product::findOrFail($postId);
+$product = Product::findOrFail($productId);
 
 // Get approved reviews (with related ratings)
 // Default: approved = true, withRatings = true
@@ -190,7 +190,7 @@ $product->getReviews(withRatings: false);
 ### Fetch the average rating:
 ```php
 // Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
-$product = App\Models\Product::findOrFail($postId);
+$product = Product::findOrFail($productId);
 
 // Get the average rating for a specific key ('overall') using approved reviews (default).
 $overallAverage = $product->averageRating('overall');
@@ -203,7 +203,7 @@ echo "Overall Average (pending): {$nonApprovedOverall}\n";
 // Get all average ratings for all rating keys from approved reviews.
 $allAverages = $product->averageRatings();
 
-// Returns
+// Returns something like
 [
     "overall"       => 3.5,
     "communication" => 2.75,
@@ -213,12 +213,14 @@ $allAverages = $product->averageRatings();
 
 // Get the overall average rating across all ratings (approved reviews by default).
 $overallRating = $product->overallAverageRating();
-echo "Overall Rating Percentage: {$overallRating}%\n";
+
+// Returns float
+3.5
 ```
 ### Get all reviews with or without ratings:
 ```php
 // Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
-$product = App\Models\Product::find($postId);
+$product = Product::find($productId);
 
 // Get all approved reviews with their ratings eager loaded.
 $reviewsWithRatings = $product->getReviews(true, true);
@@ -230,7 +232,7 @@ $reviewsWithoutRatings = $product->getReviews(true, false);
 ### Count total number of reviews:
 ````php
 // Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
-$product = App\Models\Product::find($postId);
+$product = Product::find($productId);
 
 // Returns the total number of reviews.
 $totalReviews = $product->totalReviews();
