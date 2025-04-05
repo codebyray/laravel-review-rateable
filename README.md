@@ -188,24 +188,52 @@ $product->getReviews(true, false);
 $product->getReviews(withRatings: false);
 ```
 ### Fetch the average rating:
-````php
-// In progress
-````
-
-or
-
-````php
-// In progress
-````
-
-### Get all ratings:
 ```php
-// In progress
+// Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
+$product = App\Models\Product::findOrFail($postId);
+
+// Get the average rating for a specific key ('overall') using approved reviews (default).
+$overallAverage = $product->averageRating('overall');
+echo "Overall Average (approved): {$overallAverage}\n";
+
+// Get the average rating for a specific key using non-approved reviews.
+$nonApprovedOverall = $product->averageRating('overall', false);
+echo "Overall Average (pending): {$nonApprovedOverall}\n";
+
+// Get all average ratings for all rating keys from approved reviews.
+$allAverages = $product->averageRatings();
+
+// Returns
+[
+    "overall"       => 3.5,
+    "communication" => 2.75,
+    "follow_up"     => 3.5,
+    "price"         => 4.25
+]
+
+// Get the overall average rating across all ratings (approved reviews by default).
+$overallRating = $product->overallAverageRating();
+echo "Overall Rating Percentage: {$overallRating}%\n";
+```
+### Get all reviews with or without ratings:
+```php
+// Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
+$product = App\Models\Product::find($postId);
+
+// Get all approved reviews with their ratings eager loaded.
+$reviewsWithRatings = $product->getReviews(true, true);
+
+// Get all approved reviews without eager loading ratings.
+$reviewsWithoutRatings = $product->getReviews(true, false);
 ```
 
-### Count total rating:
+### Count total number of reviews:
 ````php
-// In progress
+// Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
+$product = App\Models\Product::find($postId);
+
+// Returns the total number of reviews.
+$totalReviews = $product->totalReviews();
 ````
 
 ### Notes
