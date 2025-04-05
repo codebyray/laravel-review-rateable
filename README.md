@@ -238,5 +238,62 @@ $product = Product::find($productId);
 $totalReviews = $product->totalReviews();
 ````
 
+## Example Usage in a Controller
+Every method available using the ReviewRateable Trait can also be called via the service
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Product;
+use CodeByRay\LaravelReviewRatable\Contracts\ReviewRatableContract;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class ProductReviewController extends Controller
+{
+    protected ReviewRatableContract $reviewService;
+
+    public function __construct(ReviewRatableContract $reviewService)
+    {
+        $this->reviewService = $reviewService;
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        $product = Product::find($request->input('product_id'));
+        $this->reviewService->setModel($product);
+
+        $data = [
+            'review'     => $request->input('review'),
+            'department' => $request->input('department'),
+            'recommend'  => $request->boolean('recommend'),
+            // 'approved' is optional and will default to config value.
+            'ratings'    => [
+                "overall"       => $request->input('overall'),
+                "communication" => $request->input('communication'),
+                "follow_up"     => $request->input('follow_up'),
+                "price"         => $request->input('price')
+            ]),
+        ];
+
+        $review = $this->reviewService->addReview($data, auth()->id());
+
+        return response()->json(['message' => 'Review added!', 'review' => $review]);
+    }
+
+    public function show(Product $product): JsonResponse
+    {
+        $this->reviewService->setModel($product);
+
+        $reviews = $this->reviewService->getReviews(); // Get approved reviews with ratings
+        $total   = $this->reviewService->totalReviews();
+
+        return response()->json(compact('reviews', 'total'));
+    }
+}
+```
+
 ### Notes
 
