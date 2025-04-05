@@ -294,6 +294,9 @@ class ProductReviewController extends Controller
     }
 }
 ```
-
+## Testing
+```bash
+composer test
+```
 ### Notes
 
