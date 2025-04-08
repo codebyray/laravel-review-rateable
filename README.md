@@ -1,174 +1,302 @@
 # Laravel Review Rateable
 <img alt="Packagist Downloads" src="https://img.shields.io/packagist/dt/codebyray/laravel-review-rateable"> <img alt="GitHub" src="https://img.shields.io/github/license/codebyray/laravel-review-rateable"> <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/codebyray/laravel-review-rateable"> <img alt="TravisCI" src="https://api.travis-ci.com/codebyray/laravel-review-rateable.svg?branch=master">
 
-Review Rateable system for laravel 6, 7, 8 & 9. You can rate your models by:
-- Overall Rating
-- Customer Service Rating
-- Quality Rating
-- Friendly Rating
-- Price Rating
+NOTE: This is a complete rewrite from v1. It is not compatible with previous versions of this package.
 
-You can also set whether the model being rated is recommended.
+
+Laravel Review Ratable is a flexible package that enables you to attach reviews (with multiple ratings) to any Eloquent model in your Laravel application. The package supports multiple departments, configurable rating boundaries, review approval, and a decoupled service contract so you can easily integrate, test, and extend the functionality.
+
+## Features
+
+- **Polymorphic Reviews & Ratings:** Attach written reviews along with multiple rating values to any model.
+- **Configurable Settings:** Define custom rating keys, labels, and value boundaries (min/max) via a config file.
+- **Department Support:** Organize ratings by department (e.g. default, sales, support) with their own criteria.
+- **Review Approval:** Set a default approval status for reviews (and override per review if needed).
+- **Flexible Data Retrieval:** Retrieve reviews with or without ratings, filter by approval status, and calculate averages.
+- **Service Contract:** Use a dedicated service that implements a contract for a decoupled, testable API.
+
+## Requirements
+
+- PHP 8.1 or higher
+- Laravel 10, 11, or 12
 
 ## Installation
 
-First, pull in the package through Composer.
+### 1. Install via Composer
+
+In your Laravel application's root, require the package via Composer.
 
 ```
-composer require codebyray/laravel-review-rateable
+composer require codebyray/laravel-review-rateable:^2.0
 ```
 
-And then include the service provider within `app/config/app.php`. Note: If you are running Laravel 5.5+ this will be auto loaded for you.
+### 2. Publish Package Assets
+After installation, publish the package config and migration files:
 
 ```php
-'providers' => [
-    Codebyray\ReviewRateable\ReviewRateableServiceProvider::class
-];
+php artisan vendor:publish --provider="Codebyray\ReviewRateable\ReviewRateableServiceProvider" --tag=config
 ```
-
-At last you need to publish and run the migration.
+```php
+php artisan vendor:publish --provider="Codebyray\ReviewRateable\ReviewRateableServiceProvider" --tag=migrations
 ```
-php artisan vendor:publish --provider="Codebyray\ReviewRateable\ReviewRateableServiceProvider" --tag="migrations"
-```
-
-Run the migration
-```
+Run the migrations to create the necessary database tables:
+```php
 php artisan migrate
+```
+
+## Configuration
+
+The package configuration file is located at config/laravel-review-ratable.php. Here you can adjust global settings such as:
+
+- Rating Value Boundaries:
+    - min_rating_value: Minimum rating value.
+    - max_rating_value: Maximum rating value.
+- Review Approval:
+    - review_approved: Default approval status for new reviews.
+- Departments & Rating Labels: Define multiple departments, each with its own set of rating keys and labels.
+
+### Example configuration:
+```php
+<?php
+
+return [
+    'min_rating_value' => 1,
+    'max_rating_value' => 10,
+    'review_approved'  => false, // Reviews will be unapproved by default
+
+    'departments' => [
+        'default' => [
+            'ratings' => [
+                'overall'          => 'Overall Rating',
+                'customer_service' => 'Customer Service Rating',
+                'quality'          => 'Quality Rating',
+                'price'            => 'Price Rating',
+                'recommendation'   => 'Would Recommend?',
+            ],
+        ],
+        'sales' => [
+            'ratings' => [
+                'overall'        => 'Overall Rating',
+                'communication'  => 'Communication Rating',
+                'follow_up'      => 'Follow-Up Rating',
+                'recommendation' => 'Would Recommend?',
+            ],
+        ],
+        'support' => [
+            'ratings' => [
+                'overall'        => 'Overall Rating',
+                'speed'          => 'Response Speed',
+                'knowledge'      => 'Knowledge Rating',
+                'recommendation' => 'Would Recommend?',
+            ],
+        ],
+    ],
+];
 ```
 
 -----
 
-### Setup a Model
+## Usage
+### Making a Model Reviewable
+To allow a model to be reviewed, add the ``ReviewRateable`` trait to your model. For example, in your ``Product`` model:
 ```php
 <?php
 
-namespace App;
+namespace App\Models;
 
-use Codebyray\ReviewRateable\Contracts\ReviewRateable;
-use Codebyray\ReviewRateable\Traits\ReviewRateable as ReviewRateableTrait;
 use Illuminate\Database\Eloquent\Model;
+use Codebyray\ReviewRateable\Traits\ReviewRateable;
 
-class Post extends Model implements ReviewRateable
+class Product extends Model
 {
-    use ReviewRateableTrait;
+    use ReviewRateable;
 }
 ```
-
-### Create a rating
-When creating a rating you can specify whether the rating is approved or not by adding approved to the array. This is optional and if left 
-out the default is not approved to allow for review before posting.
+### Adding a review/rating(s)
+You can add a review (with ratings) directly via the trait:
 ```php
-$user = User::first();
-$post = Post::first();
+$product = Product::find($productId);
 
-$rating = $post->rating([
-    'title' => 'This is a test title',
-    'body' => 'And we will add some shit here',
-    'customer_service_rating' => 5,
-    'quality_rating' => 5,
-    'friendly_rating' => 5,
-    'pricing_rating' => 5,
-    'rating' => 5,
-    'recommend' => 'Yes',
-    'approved' => true, // This is optional and defaults to false
-], $user);
-
-dd($rating);
+$product->addReview([
+    'review'     => 'Great product! The quality is superb and customer service was excellent.',
+    'department' => 'sales',   // Optional, defaults to 'default'
+    'recommend'  => true,      // Whether the user would recommend the product being reviewed
+    'approved'   => true,      // Optionally override default (false) approval by providing 'approved'
+    'ratings'    => [
+        'overall'        => 5,
+        'communication'  => 5,
+        'follow_up'      => 5,
+        'price'          => 5,
+    ],
+], auth()->id());
 ```
 
-### Update a rating
+### Update a review/rating(s)
 ```php
-$rating = $post->updateRating(1, [
-    'title' => 'new title',
-    'body' => 'new body',
-    'customer_service_rating' => 1,
-    'quality_rating' => 1,
-    'friendly_rating' => 3,
-    'pricing_rating' => 4,
-    'rating' => 4,
-    'recommend' => 'No',
-    'approved' => true, // This is optional and defaults to false
-]);
+// Retrieve the product you want to update the review for.
+$product = Product::findOrFail($productId);
+
+// Prepare the updated data.
+$data = [
+    'review'     => 'Updated review text',    // New review text.
+    'department' => 'default',     // Optionally, change the department.
+    'recommend'  => false,         // Update recommendation flag.
+    'approved'   => true,          // Update approval status if needed.
+    'ratings'    => [
+        'overall'        => 4,
+        'communication'  => 3,
+        'follow_up'      => 4,
+        'price'          => 2,
+    ],
+];
+
+// Call the updateReview method on the product.
+$product->updateReview($reviewId, $data);
 ```
 ### Marking review as approved
 ```php
-$rating = $post->updateRating(1, ['approved' => true]);
+// Retrieve the product you want to mark as approved
+$product = Product::findOrFail($productId);
+
+// Approve th review
+$product->approveReview($reviewId);
 ```
-### Delete a rating:
+### Delete a review/rating:
 ```php
-$post->deleteRating(1);
+// Retrieve the product with the review you want to delete
+$product = Product::findOrFail(1);
+
+// Delete the review
+$product->deleteReview($reviewId);
 ```
 
 ### Fetch approved or not approved reviews/ratings for a particular resource
 ```php
-// Get approved ratings
-$ratings = $post->getApprovedRatings($post->id, 'desc');
+// Approved reviews with ratings
+$product = Product::findOrFail($productId);
 
-// Get not approved ratings
-$ratings = $post->getNotApprovedRatings($post->id, 'desc');
+// Get approved reviews (with related ratings)
+// Default: approved = true, withRatings = true
+$product->getReviews();
 
-// Get all ratings whether approved or not
-$ratings = $post->getAllRatings($post->id, 'desc');
+// Get not approved reviews (with related ratings)
+$product->getReviews(false);
+$product->getReviews(approved: false);
 
-// Get the most recent ratings (limit and sort are optional)
-// Limit default is 5, sort default is desc
-$ratings = $post->getRecentRatings($post->id, 5, 'desc');
-
-// Get the most recent user ratings (limit and sort are optional)
-// Limit default is 5, approved default is true, sort default is desc
-$userRatings = $post->getRecentUserRatings($user->id, 5, true, 'desc');
-
+// Get approved reviews (without related ratings)
+$product->getReviews(true, false);
+$product->getReviews(withRatings: false);
 ```
 ### Fetch the average rating:
-````php
-// Get Overall Average Rating
-$post->averageRating()
-
-// Get Customer Service Average Rating
-$post->averageCustomerServiceRating()
-
-// Get Quality Average Rating
-$post->averageQualityRating()
-
-// Get Friendly Average Rating
-$post->averageFriendlyRating()
-
-// Get Price Average Rating
-$post->averagePricingRating()
-
-````
-
-or
-
-````php
-$post->averageRating(2) //round to 2 decimal place
-$post->averageRating(null, true) //get only approved average rating 
-````
-
-### Get all ratings:
 ```php
-$post = Post::first();
+// Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
+$product = Product::findOrFail($productId);
 
-$ratings = $post->getAllRatings($post->id);
+// Get the average rating for a specific key ('overall') using approved reviews (default).
+$overallAverage = $product->averageRating('overall');
+echo "Overall Average (approved): {$overallAverage}\n";
+
+// Get the average rating for a specific key using non-approved reviews.
+$nonApprovedOverall = $product->averageRating('overall', false);
+echo "Overall Average (pending): {$nonApprovedOverall}\n";
+
+// Get all average ratings for all rating keys from approved reviews.
+$allAverages = $product->averageRatings();
+
+// Returns something like
+[
+    "overall"       => 3.5,
+    "communication" => 2.75,
+    "follow_up"     => 3.5,
+    "price"         => 4.25
+]
+
+// Get the overall average rating across all ratings (approved reviews by default).
+$overallRating = $product->overallAverageRating();
+
+// Returns float
+3.5
+```
+### Get all reviews with or without ratings:
+```php
+// Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
+$product = Product::find($productId);
+
+// Get all approved reviews with their ratings eager loaded.
+$reviewsWithRatings = $product->getReviews(true, true);
+
+// Get all approved reviews without eager loading ratings.
+$reviewsWithoutRatings = $product->getReviews(true, false);
 ```
 
-### Count total rating:
+### Count total number of reviews:
 ````php
-$post->countRating()
+// Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
+$product = Product::find($productId);
+
+// Returns the total number of reviews.
+$totalReviews = $product->totalReviews();
 ````
 
-### Fetch the rating percentage.
-This is also how you enforce a maximum rating value.
-````php
-$post->ratingPercent()
+## Example Usage in a Controller
+Every method available using the ReviewRateable Trait can also be called via the service
 
-$post->ratingPercent(10)); // Ten star rating system
-// Note: The value passed in is treated as the maximum allowed value.
-// This defaults to 5 so it can be called without passing a value as well.
-````
+```php
+<?php
 
-### Note
-This is a fork from Trexology's - [Original Code - laravel-reviewRateable
-](https://github.com/Trexology/laravel-reviewRateable).
+namespace App\Http\Controllers;
 
-Please note that this code is not used in the original and is not maintained.
+use App\Models\Product;
+use CodeByRay\LaravelReviewRatable\Contracts\ReviewRatableContract;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class ProductReviewController extends Controller
+{
+    protected ReviewRatableContract $reviewService;
+
+    public function __construct(ReviewRatableContract $reviewService)
+    {
+        $this->reviewService = $reviewService;
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        $product = Product::find($request->input('product_id'));
+        $this->reviewService->setModel($product);
+
+        $data = [
+            'review'     => $request->input('review'),
+            'department' => $request->input('department'),
+            'recommend'  => $request->boolean('recommend'),
+            // 'approved' is optional and will default to config value.
+            'ratings'    => [
+                "overall"       => $request->input('overall'),
+                "communication" => $request->input('communication'),
+                "follow_up"     => $request->input('follow_up'),
+                "price"         => $request->input('price')
+            ]),
+        ];
+
+        $review = $this->reviewService->addReview($data, auth()->id());
+
+        return response()->json(['message' => 'Review added!', 'review' => $review]);
+    }
+
+    public function show(Product $product): JsonResponse
+    {
+        $this->reviewService->setModel($product);
+
+        $reviews = $this->reviewService->getReviews(); // Get approved reviews with ratings
+        $total   = $this->reviewService->totalReviews();
+
+        return response()->json(compact('reviews', 'total'));
+    }
+}
+```
+## Testing
+```bash
+composer test
+```
+### Notes
+

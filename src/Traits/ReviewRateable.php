@@ -2,384 +2,346 @@
 
 namespace Codebyray\ReviewRateable\Traits;
 
-use Illuminate\Database\Eloquent\Model;
-use Codebyray\ReviewRateable\Models\Rating;
+use Codebyray\ReviewRateable\Models\Review;
+use Illuminate\Database\Eloquent\Collection;
 
 trait ReviewRateable
 {
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * Get all reviews for the model.
      */
-    public function ratings()
+    public function reviews()
     {
-        return $this->morphMany(Rating::class, 'reviewrateable');
+        return $this->morphMany(Review::class, 'reviewable');
     }
 
     /**
+     * Add a review along with its ratings.
      *
+     * The $data array can include:
+     *  - 'review': The review text.
+     *  - 'department': The department key (defaults to 'default').
+     *  - 'recommend': Boolean indicating if the reviewer recommends the item.
+     *  - 'approved': (Optional) Whether the review is approved. If not provided, uses config value.
+     *  - 'ratings': An associative array of rating values.
      *
-     * @param $round
-     * @param $onlyApproved
-     *
-     * @return double
+     * @param  array      $data
+     * @param int|null $userId
+     * @return Review
      */
-    public function averageRating($round= null, $onlyApproved= false)
+    public function addReview(array $data, ?int $userId = null): Review
     {
-        $where = $onlyApproved ? [['approved', '1']] : [];
-        $avgExpression = null;
+        // Determine department, recommendation, and approval status.
+        $department = $data['department'] ?? 'default';
+        $recommend  = $data['recommend'] ?? false;
+        $approved   = $data['approved'] ?? config('review-rateable.approved_review', false);
 
-        if ($round) {
-            $avgExpression = 'ROUND(AVG(rating), ' . $round . ') as averageReviewRateable';
-        } else {
-            $avgExpression = 'AVG(rating) as averageReviewRateable';
+        // Create the review record.
+        $review = $this->reviews()->create(
+            [
+                'user_id'    => $userId,
+                'review'     => $data['review'] ?? null,
+                'department' => $department,
+                'recommend'  => $recommend,
+                'approved'   => $approved,
+            ]
+        );
+
+        // Get allowed rating keys for the specified department.
+        $departments = config('review-rateable.departments', []);
+        $configRatings = $departments[$department]['ratings'] ?? [];
+
+        // Get global min and max rating values.
+        $min = config('review-rateable.min_rating_value', 1);
+        $max = config('review-rateable.max_rating_value', 10);
+
+        // Process each allowed rating key.
+        foreach ($configRatings as $key => $label) {
+            if (isset($data['ratings'][$key])) {
+                $value = $data['ratings'][$key];
+
+                // Enforce rating boundaries.
+                if ($value < $min) {
+                    $value = $min;
+                } elseif ($value > $max) {
+                    $value = $max;
+                }
+
+                $review->ratings()->create(
+                    [
+                        'key'   => $key,
+                        'value' => $value,
+                    ]
+                );
+            }
         }
 
-        return $this->ratings()
-            ->selectRaw($avgExpression)
-            ->where($where)
-            ->get()
-            ->first()
-            ->averageReviewRateable;
+        return $review;
     }
 
     /**
+     * Update a review and its ratings by review ID.
      *
-     * @var $round
-     * @var $onlyApproved
+     * The $data array can include:
+     *  - 'review': New review text.
+     *  - 'department': New department key.
+     *  - 'recommend': New recommendation flag.
+     *  - 'approved': New approval status.
+     *  - 'ratings': An associative array of rating values (key => value).
      *
-     * @return double
+     * @param int   $reviewId
+     * @param array $data
+     * @return bool  True on success, false if the review was not found.
      */
-    public function averageCustomerServiceRating($round= null, $onlyApproved= false)
+    public function updateReview(int $reviewId, array $data): bool
     {
-        $where = $onlyApproved ? [['approved', '1']] : [];
+        $review = $this->reviews()->find($reviewId);
 
-        $avgExpression = null;
-
-        if ($round) {
-            $avgExpression = 'ROUND(AVG(customer_service_rating), ' . $round . ') as averageCustomerServiceReviewRateable';
-        } else {
-            $avgExpression = 'AVG(customer_service_rating) as averageCustomerServiceReviewRateable';
+        if (!$review) {
+            return false;
         }
 
-        return $this->ratings()
-            ->selectRaw($avgExpression)
-            ->where($where)
-            ->get()
-            ->first()
-            ->averageCustomerServiceReviewRateable;
-    }
-
-    /**
-     *
-     * @param $round
-     * @param $onlyApproved
-     *
-     * @return double
-     */
-    public function averageQualityRating($round = null, $onlyApproved= false)
-    {
-        $where = $onlyApproved ? [['approved', '1']] : [];
-
-        $avgExpression = null;
-
-        if ($round) {
-            $avgExpression = 'ROUND(AVG(quality_rating), ' . $round . ') as averageQualityReviewRateable';
-        } else {
-            $avgExpression = 'AVG(quality_rating) as averageQualityReviewRateable';
+        // Prepare attributes for the review update.
+        $attributes = [];
+        if (isset($data['review'])) {
+            $attributes['review'] = $data['review'];
+        }
+        if (isset($data['department'])) {
+            $attributes['department'] = $data['department'];
+        }
+        if (isset($data['recommend'])) {
+            $attributes['recommend'] = $data['recommend'];
+        }
+        if (isset($data['approved'])) {
+            $attributes['approved'] = $data['approved'];
+        }
+        if (!empty($attributes)) {
+            $review->update($attributes);
         }
 
-        return $this->ratings()
-            ->selectRaw($avgExpression)
-            ->where($where)
-            ->get()
-            ->first()
-            ->averageQualityReviewRateable;
-    }
+        // Update ratings if provided.
+        if (isset($data['ratings']) && is_array($data['ratings'])) {
+            // Determine which department's rating keys to use.
+            $department = $attributes['department'] ?? $review->department;
+            $departments = config('review-rateable.departments', []);
+            $configRatings = $departments[$department]['ratings'] ?? [];
 
-    /**
-     *
-     * @var $round
-     * @var $onlyApproved
-     *
-     * @return double
-     */
-    public function averageFriendlyRating($round = null, $onlyApproved= false)
-    {
-        $where = $onlyApproved ? [['approved', '1']] : [];
+            // Get global min and max rating values.
+            $min = config('review-rateable.min_rating_value', 1);
+            $max = config('review-rateable.max_rating_value', 10);
 
-        $avgExpression = null;
+            foreach ($data['ratings'] as $key => $value) {
+                if ($value < $min) {
+                    $value = $min;
+                } elseif ($value > $max) {
+                    $value = $max;
+                }
 
-        if ($round) {
-            $avgExpression = 'ROUND(AVG(friendly_rating), ' . $round . ') as averageFriendlyReviewRateable';
-        } else {
-            $avgExpression = 'AVG(friendly_rating) as averageFriendlyReviewRateable';
+                $rating = $review->ratings()->where('key', $key)->first();
+                if ($rating) {
+                    $rating->update(['value' => $value]);
+                } else {
+                    if (array_key_exists($key, $configRatings)) {
+                        $review->ratings()->create(['key' => $key, 'value' => $value]);
+                    }
+                }
+            }
         }
 
-        return $this->ratings()
-            ->selectRaw($avgExpression)
-            ->where($where)
-            ->get()
-            ->first()
-            ->averageFriendlyReviewRateable;
+        return true;
     }
 
     /**
+     * Mark a review as approved by its ID.
      *
-     * @var $round
-     * @var $onlyApproved
-     *
-     * @return double
+     * @param int $reviewId
+     * @return bool True if the update was successful, false if the review was not found.
      */
-    public function averagePricingRating($round = null, $onlyApproved = false)
+    public function approveReview(int $reviewId): bool
     {
-        $where = $onlyApproved ? [['approved', '1']] : [];
+        $review = $this->reviews()->find($reviewId);
+        if (!$review) {
+            return false;
+        }
+        return $review->update(['approved' => true]);
+    }
 
-        $avgExpression = null;
+    /**
+     * Get all reviews (with attached ratings) for the model,
+     * filtered by the approved status.
+     *
+     * @param bool $approved
+     * @param bool $withRatings
+     * @return Collection
+     */
+    public function getReviews(bool $approved = true, bool $withRatings = true): Collection
+    {
+        $query = $this->reviews()->where('approved', $approved);
 
-        if ($round) {
-            $avgExpression = 'ROUND(AVG(pricing_rating), ' . $round . ') as averagePricingReviewRateable';
-        } else {
-            $avgExpression = 'AVG(pricing_rating) as averagePricingReviewRateable';
+        if ($withRatings) {
+            $query->with('ratings');
         }
 
-        return $this->ratings()
-            ->selectRaw($avgExpression)
-            ->where($where)
-            ->get()
-            ->first()
-            ->averagePricingReviewRateable;
+        return $query->get();
     }
 
     /**
-     * @var $onlyApproved
+     * Calculate the average rating for a given key, filtering reviews by approval.
      *
+     * @param string $key
+     * @param bool $approved
+     * @return float|null
+     */
+    public function averageRating(string $key, bool $approved = true): ?float
+    {
+        return $this->reviews()
+            ->where('approved', $approved)
+            ->whereHas('ratings', function ($query) use ($key) {
+                $query->where('key', $key);
+            })
+            ->with('ratings')
+            ->get()
+            ->pluck('ratings')
+            ->flatten()
+            ->where('key', $key)
+            ->avg('value');
+    }
+
+    /**
+     * Get overall average ratings for all keys, filtering reviews by approval.
+     *
+     * @param bool $approved
+     * @return array  Format: ['overall' => 4.5, 'quality' => 4.0, ...]
+     */
+    public function averageRatings(bool $approved = true): array
+    {
+        $averages = [];
+
+        $this->reviews()
+            ->where('approved', $approved)
+            ->with('ratings')
+            ->get()
+            ->each(function ($review) use (&$averages) {
+                foreach ($review->ratings as $rating) {
+                    if (!isset($averages[$rating->key])) {
+                        $averages[$rating->key] = ['sum' => 0, 'count' => 0];
+                    }
+                    $averages[$rating->key]['sum'] += $rating->value;
+                    $averages[$rating->key]['count']++;
+                }
+            });
+
+        foreach ($averages as $key => $data) {
+            $averages[$key] = $data['count'] ? $data['sum'] / $data['count'] : null;
+        }
+
+        return $averages;
+    }
+
+    /**
+     * Calculate the average rating for a given key within a department,
+     * filtering reviews by approval.
+     *
+     * @param string $department
+     * @param string $key
+     * @param bool $approved
+     * @return float|null
+     */
+    public function averageRatingByDepartment(string $department, string $key, bool $approved = true): ?float
+    {
+        return $this->reviews()
+            ->where('department', $department)
+            ->where('approved', $approved)
+            ->whereHas('ratings', function ($query) use ($key) {
+                $query->where('key', $key);
+            })
+            ->with('ratings')
+            ->get()
+            ->pluck('ratings')
+            ->flatten()
+            ->where('key', $key)
+            ->avg('value');
+    }
+
+    /**
+     * Get overall average ratings for all keys within a department,
+     * filtering reviews by approval.
+     *
+     * @param string $department
+     * @param bool $approved
+     * @return array  Format: ['overall' => 4.5, 'quality' => 4.0, ...]
+     */
+    public function averageRatingsByDepartment(string $department, bool $approved = true): array
+    {
+        $averages = [];
+
+        $this->reviews()
+            ->where('department', $department)
+            ->where('approved', $approved)
+            ->with('ratings')
+            ->get()
+            ->each(function ($review) use (&$averages) {
+                foreach ($review->ratings as $rating) {
+                    if (!isset($averages[$rating->key])) {
+                        $averages[$rating->key] = ['sum' => 0, 'count' => 0];
+                    }
+                    $averages[$rating->key]['sum'] += $rating->value;
+                    $averages[$rating->key]['count']++;
+                }
+            });
+
+        foreach ($averages as $key => $data) {
+            $averages[$key] = $data['count'] ? $data['sum'] / $data['count'] : null;
+        }
+
+        return $averages;
+    }
+
+    /**
+     * Get the total number of reviews for the model.
+     *
+     * @param bool $approved
      * @return int
      */
-    public function countRating($onlyApproved = false)
+    public function totalReviews(bool $approved = true): int
     {
-        $where = $onlyApproved ? [['approved', '1']] : [];
+        return $this->reviews()->where('approved', $approved)->count();
+    }
 
-        return $this->ratings()
-            ->selectRaw('count(rating) as countReviewRateable')
-            ->where($where)
+    /**
+     * Calculate the overall average rating for all ratings across all reviews,
+     * optionally filtering by the approved status.
+     *
+     * @param bool $approved
+     * @return float|null
+     */
+    public function overallAverageRating(bool $approved = true): ?float
+    {
+        $ratings = $this->reviews()
+            ->where('approved', $approved)
+            ->with('ratings')
             ->get()
-            ->first()
-            ->countReviewRateable;
+            ->pluck('ratings')
+            ->flatten();
+
+        return $ratings->avg('value');
     }
 
     /**
-     * @var $onlyApproved
+     * Delete a review by its ID.
      *
-     * @return int
+     * @param int $reviewId
+     * @return bool True if the review was deleted, false otherwise.
      */
-    public function countCustomerServiceRating($onlyApproved = false)
+    public function deleteReview(int $reviewId): bool
     {
-        $where = $onlyApproved ? [['approved', '1']] : [];
+        $review = $this->reviews()->find($reviewId);
 
-        return $this->ratings()
-            ->selectRaw('count(customer_service_rating) as countCustomerServiceReviewRateable')
-            ->where($where)
-            ->get()
-            ->first()
-            ->countCustomerServiceReviewRateable;
+        if ($review) {
+            return $review->delete();
+        }
+
+        return false;
     }
 
-    /**
-     * @var $onlyApproved
-     *
-     * @return int
-     */
-    public function countQualityRating($onlyApproved = false)
-    {
-        $where = $onlyApproved ? [['approved', '1']] : [];
-
-        return $this->ratings()
-            ->selectRaw('count(quality_rating) as countQualityReviewRateable')
-            ->where($where)
-            ->get()
-            ->first()
-            ->countQualityReviewRateable;
-    }
-
-    /**
-     * @var $onlyApproved
-     *
-     * @return int
-     */
-    public function countFriendlyRating($onlyApproved = false) 
-    {
-        $where = $onlyApproved ? [['approved', '1']] : [];
-
-        return $this->ratings()
-            ->selectRaw('count(friendly_rating) as countFriendlyReviewRateable')
-            ->where($where)
-            ->get()
-            ->first()
-            ->countFriendlyReviewRateable;
-    }
-
-    /**
-     * @var $onlyApproved
-     *
-     * @return int
-     */
-    public function countPriceRating($onlyApproved = false) 
-    {
-        $where = $onlyApproved ? [['approved', '1']] : [];
-
-        return $this->ratings()
-            ->selectRaw('count(pricing_rating) as countPriceReviewRateable')
-            ->where($where)
-            ->get()
-            ->first()
-            ->countPriceReviewRateable;
-    }
-
-    /**
-     * @var $onlyApproved
-     *
-     * @return double
-     */
-    public function sumRating($onlyApproved = false)
-    {
-        $where = $onlyApproved ? [['approved', '1']] : [];
-
-        return $this->ratings()
-            ->selectRaw('SUM(rating) as sumReviewRateable')
-            ->where($where)
-            ->get()
-            ->first()
-            ->sumReviewRateable;
-    }
-
-    /**
-     * @param $max
-     *
-     * @return double
-     */
-    public function ratingPercent($max = 5)
-    {
-        $ratings = $this->ratings();
-        $quantity = $ratings->count();
-        $total = $ratings->selectRaw('SUM(rating) as total')->get()->first()->total;
-        return ($quantity * $max) > 0 ? $total / (($quantity * $max) / 100) : 0;
-    }
-
-    /**
-     * @param $data
-     * @param $author
-     * @param $parent
-     *
-     * @return static
-     */
-    public function rating($data, Model $author, Model $parent = null)
-    {
-        return (new Rating())->createRating($this, $data, $author);
-    }
-
-    /**
-     * @param $id
-     * @param $data
-     * @param $parent
-     *
-     * @return mixed
-     */
-    public function updateRating($id, $data, Model $parent = null)
-    {
-        return (new Rating())->updateRating($id, $data);
-    }
-
-    /**
-     *
-     * @param $id
-     * @param $sort
-     *
-     * @return mixed
-     */
-    public function getAllRatings($id, $sort = 'desc')
-    {
-        return (new Rating())->getAllRatings($id, $sort);
-    }
-
-    /**
-     *
-     * @param $id
-     * @param $sort
-     *
-     * @return mixed
-     */
-    public function getApprovedRatings($id, $sort = 'desc')
-    {
-        return (new Rating())->getApprovedRatings($id, $sort);
-    }
-
-    /**
-     *
-     * @param $id
-     * @param $sort
-     *
-     * @return mixed
-     */
-    public function getNotApprovedRatings($id, $sort = 'desc')
-    {
-        return (new Rating())->getNotApprovedRatings($id, $sort);
-    }
-
-    /**
-     * @param $id
-     * @param $limit
-     * @param $sort
-     *
-     * @return mixed
-     */
-    public function getRecentRatings($id, $limit = 5, $sort = 'desc')
-    {
-        return (new Rating())->getRecentRatings($id, $limit,  $sort);
-    }
-
-    /**
-     * @param $id
-     * @param $limit
-     * @param $approved
-     * @param $sort
-     *
-     * @return mixed
-     */
-    public function getRecentUserRatings($id, $limit = 5, $approved = true, $sort = 'desc')
-    {
-        return (new Rating())->getRecentUserRatings($id, $limit, $approved, $sort);
-    }
-
-    /**
-     * @param $rating
-     * @param $type
-     * @param $approved
-     * @param $sort
-     *
-     * @return mixed
-     */
-    public function getCollectionByAverageRating($rating, $type = 'rating', $approved = true, $sort = 'desc')
-    {
-        return (new Rating())->getCollectionByAverageRating($rating, $approved, $sort);
-    }
-
-    /**
-     * @param $id
-     *
-     * @return mixed
-     */
-    public function deleteRating($id)
-    {
-        return (new Rating())->deleteRating($id);
-    }
-
-    /**
-     * @param $id
-     *
-     * @return mixed
-     */
-    public function getUserRatings($id, $author, $sort = 'desc')
-    {
-        return (new Rating())->getUserRatings($id, $author, $sort = 'desc');
-    }
 }

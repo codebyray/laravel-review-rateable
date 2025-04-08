@@ -1,46 +1,16 @@
 <?php
 
-namespace Codebyray\ReviewRateable\Test;
+namespace Codebyray\ReviewRateable\Tests;
 
+use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Codebyray\ReviewRateable\ReviewRateableServiceProvider;
-use Orchestra\Testbench\TestCase as Orchestra;
 
-abstract class TestCase extends Orchestra
+abstract class TestCase extends OrchestraTestCase
 {
-
-    /**
-     * Setup the test environment.
-     */
-    public function setUp()
+    protected function getPackageProviders($app): array
     {
-        parent::setUp();
-    }
-
-    /**
-     * add the package provider
-     *
-     * @param $app
-     * @return array
-     */
-    protected function getPackageProviders($app)
-    {
-        return [ReviewRateableServiceProvider::class];
-    }
-
-    /**
-     * Define environment setup.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return void
-     */
-    protected function getEnvironmentSetUp($app)
-    {
-        // Setup default database to use sqlite :memory:
-        $app['config']->set('database.default', 'testing');
-        $app['config']->set('database.connections.testing', [
-            'driver'   => 'sqlite',
-            'database' => ':memory:',
-            'prefix'   => '',
-        ]);
+        return [
+            ReviewRateableServiceProvider::class,
+        ];
     }
 }
