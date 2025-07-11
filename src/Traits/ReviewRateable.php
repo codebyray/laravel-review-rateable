@@ -390,8 +390,8 @@ trait ReviewRateable
 
         $rawCounts = Rating::select('value', DB::raw('count(*) as count'))
             ->whereHas('review', function ($q) use ($reviewQuery) {
-                $sql      = $reviewQuery->toBase()->getQuery()->toSql();
-                $bindings = $reviewQuery->getBindings();
+                $sql = $reviewQuery->toBase()->toSql();
+                $bindings = $reviewQuery->toBase()->getBindings();
                 $q->from(DB::raw("({$sql}) as reviews_sub"))
                     ->whereColumn('reviews_sub.id', 'ratings.review_id');
                 foreach ($bindings as $i => $b) {
