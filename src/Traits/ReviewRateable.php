@@ -378,36 +378,32 @@ trait ReviewRateable
      */
     public function ratingCounts(?string $department = null, bool $approved = true): array
     {
-        $min = config('review-rateable.min_rating_value', 1);
-        $max = config('review-rateable.max_rating_value', 5);
+        $min         = config('review-rateable.min_rating_value', 1);
+        $max         = config('review-rateable.max_rating_value', 5);
+        $reviewTable = (new Review)->getTable();
+        $ratingTable = (new Rating)->getTable();
 
-        $reviewQuery = $this->reviews()
-            ->where('approved', $approved);
+        $query = Rating::select("{$ratingTable}.value", DB::raw('COUNT(*) as total'))
+            ->join($reviewTable, "{$ratingTable}.review_id", '=', "{$reviewTable}.id")
+            ->where("{$reviewTable}.reviewable_type", $this->getMorphClass())
+            ->where("{$reviewTable}.reviewable_id",   $this->getKey())
+            ->where("{$reviewTable}.approved",        $approved);
 
         if ($department) {
-            $reviewQuery->where('department', $department);
+            $query->where("{$reviewTable}.department", $department);
         }
 
-        $rawCounts = Rating::select('value', DB::raw('count(*) as count'))
-            ->whereHas('review', function ($q) use ($reviewQuery) {
-                $sql = $reviewQuery->toBase()->toSql();
-                $bindings = $reviewQuery->toBase()->getBindings();
-                $q->from(DB::raw("({$sql}) as reviews_sub"))
-                    ->whereColumn('reviews_sub.id', 'ratings.review_id');
-                foreach ($bindings as $i => $b) {
-                    $q->addBinding($b, 'where');
-                }
-            })
-            ->groupBy('value')
-            ->pluck('count', 'value')
+        $raw = $query
+            ->groupBy("{$ratingTable}.value")
+            ->pluck('total', 'value')
             ->all();
 
+        // zero-fill any missing star values
         $counts = [];
         for ($i = $min; $i <= $max; $i++) {
-            $counts[$i] = $rawCounts[$i] ?? 0;
+            $counts[$i] = $raw[$i] ?? 0;
         }
 
         return $counts;
     }
-
 }
