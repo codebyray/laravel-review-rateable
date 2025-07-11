@@ -5,7 +5,7 @@ namespace Codebyray\ReviewRateable\Traits;
 use Codebyray\ReviewRateable\Models\Rating;
 use Codebyray\ReviewRateable\Models\Review;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
+use DB;
 
 trait ReviewRateable
 {
