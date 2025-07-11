@@ -85,6 +85,8 @@ interface ReviewRateableContract
      */
     public function getReviews(bool $approved = true, bool $withRatings = true): Collection;
 
+    public function getReviewsByDepartment(string $department, bool $approved = true, bool $withRatings = true): Collection;
+
     /**
      * Get the total number of reviews for the attached model.
      *
@@ -108,5 +110,15 @@ interface ReviewRateableContract
      * @return bool
      */
     public function deleteReview(int $reviewId): bool;
+
+    /**
+     * Return an array of rating value ⇒ count, for the full model
+     * or for a given department.
+     *
+     * @param string|null $department
+     * @param bool $approved
+     * @return array
+     */
+    public function ratingCounts(?string $department = null, bool $approved = true): array;
 
 }

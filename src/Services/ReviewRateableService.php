@@ -179,4 +179,18 @@ class ReviewRateableService implements ReviewRateableContract
         return $this->getModel()->deleteReview($reviewId);
     }
 
+    /**
+     * Return an array of rating value ⇒ count, for the full model
+     * or for a given department.
+     *
+     * @param string|null $department
+     * @param bool $approved
+     * @return array
+     * @throws Exception
+     */
+    public function ratingCounts(?string $department = null, bool $approved = true): array
+    {
+        return $this->getModel()->ratingCounts($approved);
+    }
+
 }

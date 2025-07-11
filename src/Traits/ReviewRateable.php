@@ -2,8 +2,10 @@
 
 namespace Codebyray\ReviewRateable\Traits;
 
+use Codebyray\ReviewRateable\Models\Rating;
 use Codebyray\ReviewRateable\Models\Review;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 trait ReviewRateable
 {
@@ -186,6 +188,28 @@ trait ReviewRateable
     }
 
     /**
+     * Get all reviews (with attached ratings) for a department,
+     * filtered by the approved status.
+     *
+     * @param string $department
+     * @param bool $approved
+     * @param bool $withRatings
+     * @return Collection
+     */
+    public function getReviewsByDepartment(string $department, bool $approved = true, bool $withRatings = true): Collection
+    {
+        $query = $this->reviews()
+            ->where('department', $department)
+            ->where('approved', $approved);
+
+        if ($withRatings) {
+            $query->with('ratings');
+        }
+
+        return $query->get();
+    }
+
+    /**
      * Calculate the average rating for a given key, filtering reviews by approval.
      *
      * @param string $key
@@ -342,6 +366,48 @@ trait ReviewRateable
         }
 
         return false;
+    }
+
+    /**
+     * Return an array of rating value ⇒ count, for the full model
+     * or for a given department.
+     *
+     * @param  string|null  $department  If null, counts across all departments.
+     * @param  bool         $approved    Only count approved reviews?
+     * @return array        [1 => 12, 2 => 5, 3 => 23, 4 => 17, 5 => 42]
+     */
+    public function ratingCounts(?string $department = null, bool $approved = true): array
+    {
+        $min = config('review-rateable.min_rating_value', 1);
+        $max = config('review-rateable.max_rating_value', 5);
+
+        $reviewQuery = $this->reviews()
+            ->where('approved', $approved);
+
+        if ($department) {
+            $reviewQuery->where('department', $department);
+        }
+
+        $rawCounts = Rating::select('value', DB::raw('count(*) as count'))
+            ->whereHas('review', function ($q) use ($reviewQuery) {
+                $sql      = $reviewQuery->toBase()->getQuery()->toSql();
+                $bindings = $reviewQuery->getBindings();
+                $q->from(DB::raw("({$sql}) as reviews_sub"))
+                    ->whereColumn('reviews_sub.id', 'ratings.review_id');
+                foreach ($bindings as $i => $b) {
+                    $q->addBinding($b, 'where');
+                }
+            })
+            ->groupBy('value')
+            ->pluck('count', 'value')
+            ->all();
+
+        $counts = [];
+        for ($i = $min; $i <= $max; $i++) {
+            $counts[$i] = $rawCounts[$i] ?? 0;
+        }
+
+        return $counts;
     }
 
 }
