@@ -3,8 +3,6 @@
 namespace Codebyray\ReviewRateable\Services;
 
 use Codebyray\ReviewRateable\Contracts\ReviewRateableContract;
-use Codebyray\ReviewRateable\Models\Rating;
-use Codebyray\ReviewRateable\Models\Review;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 

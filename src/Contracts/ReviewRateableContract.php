@@ -150,5 +150,4 @@ interface ReviewRateableContract
      * @return array
      */
     public function ratingStats(?string $department = null, bool $approved = true): array;
-
 }
