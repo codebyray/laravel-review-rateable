@@ -333,6 +333,19 @@ trait ReviewRateable
     }
 
     /**
+     * Get the total number of reviews for the model.
+     *
+     * @param bool $approved
+     * @return int
+     */
+    public function totalDepartmentReviews(string $department, bool $approved = true): int
+    {
+        return $this->reviews()
+            ->where('department', $department)
+            ->where('approved', $approved)->count();
+    }
+
+    /**
      * Calculate the overall average rating for all ratings across all reviews,
      * optionally filtering by the approved status.
      *
