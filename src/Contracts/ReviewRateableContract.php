@@ -85,6 +85,15 @@ interface ReviewRateableContract
      */
     public function getReviews(bool $approved = true, bool $withRatings = true): Collection;
 
+    /**
+     * Get all reviews (with attached ratings) for a department,
+     * filtered by the approved status.
+     *
+     * @param string $department
+     * @param bool $approved
+     * @param bool $withRatings
+     * @return Collection
+     */
     public function getReviewsByDepartment(string $department, bool $approved = true, bool $withRatings = true): Collection;
 
     /**
@@ -94,6 +103,15 @@ interface ReviewRateableContract
      * @return int
      */
     public function totalReviews(bool $approved = true): int;
+
+    /**
+     * Get the total number of reviews for the model by department.
+     *
+     * @param string $department
+     * @param bool $approved
+     * @return int
+     */
+    public function totalDepartmentReviews(string $department, bool $approved = true): int;
 
     /**
      * Get the overall average rating for all ratings attached to the model.
@@ -120,5 +138,17 @@ interface ReviewRateableContract
      * @return array
      */
     public function ratingCounts(?string $department = null, bool $approved = true): array;
+
+    /**
+     * Return an array with:
+     *  • counts:     [1 => x, 2 => y, …, 5 => z]
+     *  • percentages: [1 => pct1, …, 5 => pct5]
+     *  • total:      total number of ratings
+     *
+     * @param  string|null  $department
+     * @param  bool         $approved
+     * @return array
+     */
+    public function ratingStats(?string $department = null, bool $approved = true): array;
 
 }

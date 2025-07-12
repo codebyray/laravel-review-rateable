@@ -3,6 +3,8 @@
 namespace Codebyray\ReviewRateable\Services;
 
 use Codebyray\ReviewRateable\Contracts\ReviewRateableContract;
+use Codebyray\ReviewRateable\Models\Rating;
+use Codebyray\ReviewRateable\Models\Review;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -146,6 +148,21 @@ class ReviewRateableService implements ReviewRateableContract
     }
 
     /**
+     * Get all reviews (with attached ratings) for a department,
+     * filtered by the approved status.
+     *
+     * @param string $department
+     * @param bool $approved
+     * @param bool $withRatings
+     * @return Collection
+     * @throws Exception
+     */
+    public function getReviewsByDepartment(string $department, bool $approved = true, bool $withRatings = true): Collection
+    {
+        return $this->getModel()->getReviewsByDepartment($department, $approved, $withRatings);
+    }
+
+    /**
      * Get the total number of ratings for the attached model.
      *
      * @param bool $approved
@@ -155,6 +172,19 @@ class ReviewRateableService implements ReviewRateableContract
     public function totalReviews(bool $approved = true): int
     {
         return $this->getModel()->reviewCount($approved);
+    }
+
+    /**
+     * Get the total number of reviews for the model by department.
+     *
+     * @param string $department
+     * @param bool $approved
+     * @return int
+     * @throws Exception
+     */
+    public function totalDepartmentReviews(string $department, bool $approved = true): int
+    {
+        return $this->getModel()->totalReviews($department, $approved);
     }
 
     /**
@@ -190,7 +220,22 @@ class ReviewRateableService implements ReviewRateableContract
      */
     public function ratingCounts(?string $department = null, bool $approved = true): array
     {
-        return $this->getModel()->ratingCounts($approved);
+        return $this->getModel()->ratingCounts($department, $approved);
     }
 
+    /**
+     * Return an array with:
+     *  • counts:     [1 => x, 2 => y, …, 5 => z]
+     *  • percentages: [1 => pct1, …, 5 => pct5]
+     *  • total:      total number of ratings
+     *
+     * @param string|null $department
+     * @param bool $approved
+     * @return array
+     * @throws Exception
+     */
+    public function ratingStats(?string $department = null, bool $approved = true): array
+    {
+        return $this->getModel()->ratingStats($department, $approved);
+    }
 }
