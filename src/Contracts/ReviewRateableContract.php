@@ -150,4 +150,15 @@ interface ReviewRateableContract
      * @return array
      */
     public function ratingStats(?string $department = null, bool $approved = true): array;
+
+    /**
+     * Return reviews based on star ratings.
+     *
+     * @param int $starValue
+     * @param string|null $department
+     * @param bool $approved
+     * @param bool $withRatings
+     * @return Collection
+     */
+    public function getReviewsByRating(int $starValue, string $department = null, bool $approved   = true, bool $withRatings = true): Collection;
 }

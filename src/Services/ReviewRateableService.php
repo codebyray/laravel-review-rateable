@@ -236,4 +236,19 @@ class ReviewRateableService implements ReviewRateableContract
     {
         return $this->getModel()->ratingStats($department, $approved);
     }
+
+    /**
+     * Return reviews based on star ratings.
+     *
+     * @param int $starValue
+     * @param string|null $department
+     * @param bool $approved
+     * @param bool $withRatings
+     * @return Collection
+     * @throws Exception
+     */
+    public function getReviewsByRating(int $starValue, string $department = null, bool $approved = true, bool $withRatings = true): Collection
+    {
+        return $this->getModel()->getReviewsByRating($starValue, $department, $approved, $withRatings);
+    }
 }

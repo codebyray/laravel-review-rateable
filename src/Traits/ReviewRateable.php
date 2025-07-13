@@ -472,4 +472,29 @@ trait ReviewRateable
             'total'       => $total,
         ];
     }
+
+    /**
+     * Return reviews based on star ratings.
+     *
+     * @param int $starValue
+     * @param string|null $department
+     * @param bool $approved
+     * @param bool $withRatings
+     * @return Collection
+     */
+    public function getReviewsByRating(int $starValue, string $department = null, bool $approved   = true, bool $withRatings = true): Collection
+    {
+        $query = $this->reviews()
+            ->when($approved, fn($q) => $q->where('approved', $approved))
+            ->when($department, fn($q) => $q->where('department', $department))
+            ->whereHas('ratings', fn($q) =>
+            $q->where('value', $starValue)
+            );
+
+        if ($withRatings) {
+            $query->with('ratings');
+        }
+
+        return $query->get();
+    }
 }
