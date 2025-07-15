@@ -95,7 +95,7 @@ trait ReviewRateable
      * @param array $data
      * @return bool  True on success, false if the review was not found.
      */
-    public function updateReview(int $reviewId, array $data): bool
+    public function updateReview(int $reviewId = null, array $data = null): bool
     {
         $review = $this->reviews()->find($reviewId);
 
@@ -159,7 +159,7 @@ trait ReviewRateable
      * @param int $reviewId
      * @return bool True if the update was successful, false if the review was not found.
      */
-    public function approveReview(int $reviewId): bool
+    public function approveReview(int $reviewId = null): bool
     {
         $review = $this->reviews()->find($reviewId);
         if (!$review) {
@@ -175,7 +175,7 @@ trait ReviewRateable
      * @param bool $approved
      * @return float|null
      */
-    public function averageRating(string $key, bool $approved = true): ?float
+    public function averageRating(string $key = null, bool $approved = true): ?float
     {
         return $this->reviews()
             ->where('approved', $approved)
@@ -230,7 +230,7 @@ trait ReviewRateable
      * @param bool $approved
      * @return float|null
      */
-    public function averageRatingByDepartment(string $department, string $key, bool $approved = true): ?float
+    public function averageRatingByDepartment(string $department = "default", string $key = null, bool $approved = true): ?float
     {
         return $this->reviews()
             ->where('department', $department)
@@ -254,7 +254,7 @@ trait ReviewRateable
      * @param bool $approved
      * @return array  Format: ['overall' => 4.5, 'quality' => 4.0, ...]
      */
-    public function averageRatingsByDepartment(string $department, bool $approved = true): array
+    public function averageRatingsByDepartment(string $department = "default", bool $approved = true): array
     {
         $averages = [];
 
@@ -308,7 +308,7 @@ trait ReviewRateable
      * @param bool $withRatings
      * @return Collection
      */
-    public function getReviewsByDepartment(string $department, bool $approved = true, bool $withRatings = true): Collection
+    public function getReviewsByDepartment(string $department = "default", bool $approved = true, bool $withRatings = true): Collection
     {
         $query = $this->reviews()
             ->where('department', $department)
@@ -339,7 +339,7 @@ trait ReviewRateable
      * @param bool $approved
      * @return int
      */
-    public function totalDepartmentReviews(string $department, bool $approved = true): int
+    public function totalDepartmentReviews(string $department = "default", bool $approved = true): int
     {
         return $this->reviews()
             ->where('department', $department)
@@ -371,7 +371,7 @@ trait ReviewRateable
      * @param int $reviewId
      * @return bool True if the review was deleted, false otherwise.
      */
-    public function deleteReview(int $reviewId): bool
+    public function deleteReview(int $reviewId = null): bool
     {
         $review = $this->reviews()->find($reviewId);
 
@@ -390,7 +390,7 @@ trait ReviewRateable
      * @param  bool         $approved    Only count approved reviews?
      * @return array        [1 => 12, 2 => 5, 3 => 23, 4 => 17, 5 => 42]
      */
-    public function ratingCounts(?string $department = null, bool $approved = true): array
+    public function ratingCounts(?string $department = "default", bool $approved = true): array
     {
         $min         = config('review-rateable.min_rating_value', 1);
         $max         = config('review-rateable.max_rating_value', 5);
@@ -423,15 +423,15 @@ trait ReviewRateable
 
     /**
      * Return an array with:
-     *  • counts:     [1 => x, 2 => y, …, 5 => z]
+     *  • counts: [1 => x, 2 => y, …, 5 => z]
      *  • percentages: [1 => pct1, …, 5 => pct5]
-     *  • total:      total number of ratings
+     *  • total: total number of ratings
      *
      * @param  string|null  $department
      * @param  bool         $approved
      * @return array
      */
-    public function ratingStats(?string $department = null, bool $approved = true): array
+    public function ratingStats(?string $department = "default", bool $approved = true): array
     {
         $min         = config('review-rateable.min_rating_value', 1);
         $max         = config('review-rateable.max_rating_value', 5);
@@ -482,7 +482,7 @@ trait ReviewRateable
      * @param bool $withRatings
      * @return Collection
      */
-    public function getReviewsByRating(int $starValue, string $department = null, bool $approved   = true, bool $withRatings = true): Collection
+    public function getReviewsByRating(int $starValue = null, string $department = "default", bool $approved = true, bool $withRatings = true): Collection
     {
         $query = $this->reviews()
             ->when($approved, fn($q) => $q->where('approved', $approved))

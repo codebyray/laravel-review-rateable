@@ -30,7 +30,7 @@ interface ReviewRateableContract
      * @param array $data
      * @return bool
      */
-    public function updateReview(int $reviewId, array $data): bool;
+    public function updateReview(int $reviewId = null, array $data = null): bool;
 
     /**
      * Mark a review as approved by its ID.
@@ -38,7 +38,7 @@ interface ReviewRateableContract
      * @param int $reviewId
      * @return bool
      */
-    public function approveReview(int $reviewId): bool;
+    public function approveReview(int $reviewId = null): bool;
 
     /**
      * Get the average rating for a given key.
@@ -47,7 +47,7 @@ interface ReviewRateableContract
      * @param bool $approved
      * @return float|null
      */
-    public function averageRating(string $key, bool $approved = true): ?float;
+    public function averageRating(string $key = null, bool $approved = true): ?float;
 
     /**
      * Get overall average ratings for all keys.
@@ -65,7 +65,7 @@ interface ReviewRateableContract
      * @param bool $approved
      * @return float|null
      */
-    public function averageRatingByDepartment(string $department, string $key, bool $approved = true): ?float;
+    public function averageRatingByDepartment(string $department = "default", string $key = null, bool $approved = true): ?float;
 
     /**
      * Get overall average ratings for all keys within a department.
@@ -74,7 +74,7 @@ interface ReviewRateableContract
      * @param bool $approved
      * @return array
      */
-    public function averageRatingsByDepartment(string $department, bool $approved = true): array;
+    public function averageRatingsByDepartment(string $department = "default", bool $approved = true): array;
 
     /**
      * Get all reviews (with attached ratings) for the attached model.
@@ -94,7 +94,7 @@ interface ReviewRateableContract
      * @param bool $withRatings
      * @return Collection
      */
-    public function getReviewsByDepartment(string $department, bool $approved = true, bool $withRatings = true): Collection;
+    public function getReviewsByDepartment(string $department = "default", bool $approved = true, bool $withRatings = true): Collection;
 
     /**
      * Get the total number of reviews for the attached model.
@@ -111,7 +111,7 @@ interface ReviewRateableContract
      * @param bool $approved
      * @return int
      */
-    public function totalDepartmentReviews(string $department, bool $approved = true): int;
+    public function totalDepartmentReviews(string $department = "default", bool $approved = true): int;
 
     /**
      * Get the overall average rating for all ratings attached to the model.
@@ -127,7 +127,7 @@ interface ReviewRateableContract
      * @param int $reviewId
      * @return bool
      */
-    public function deleteReview(int $reviewId): bool;
+    public function deleteReview(int $reviewId = null): bool;
 
     /**
      * Return an array of rating value ⇒ count, for the full model
@@ -137,7 +137,7 @@ interface ReviewRateableContract
      * @param bool $approved
      * @return array
      */
-    public function ratingCounts(?string $department = null, bool $approved = true): array;
+    public function ratingCounts(?string $department = "default", bool $approved = true): array;
 
     /**
      * Return an array with:
@@ -149,16 +149,16 @@ interface ReviewRateableContract
      * @param  bool         $approved
      * @return array
      */
-    public function ratingStats(?string $department = null, bool $approved = true): array;
+    public function ratingStats(?string $department = "default", bool $approved = true): array;
 
     /**
      * Return reviews based on star ratings.
      *
-     * @param int $starValue
-     * @param string|null $department
+     * @param int|null $starValue
+     * @param string $department
      * @param bool $approved
      * @param bool $withRatings
      * @return Collection
      */
-    public function getReviewsByRating(int $starValue, string $department = null, bool $approved   = true, bool $withRatings = true): Collection;
+    public function getReviewsByRating(int $starValue = null, string $department = "default", bool $approved   = true, bool $withRatings = true): Collection;
 }
