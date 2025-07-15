@@ -67,7 +67,7 @@ class ReviewRateableService implements ReviewRateableContract
      * @return bool  True on success, false if the review was not found.
      * @throws Exception
      */
-    public function updateReview(int $reviewId, array $data): bool
+    public function updateReview(int $reviewId = null, array $data = null): bool
     {
         return $this->getModel()->updateReview($reviewId, $data);
     }
@@ -75,7 +75,7 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Delegate approving a review.
      */
-    public function approveReview(int $reviewId): bool
+    public function approveReview(int $reviewId = null): bool
     {
         return $this->getModel()->approveReview($reviewId);
     }
@@ -88,7 +88,7 @@ class ReviewRateableService implements ReviewRateableContract
      * @return float|null
      * @throws Exception
      */
-    public function averageRating(string $key, bool $approved = true): ?float
+    public function averageRating(string $key = null, bool $approved = true): ?float
     {
         return $this->getModel()->averageRating($key, $approved);
     }
@@ -114,7 +114,7 @@ class ReviewRateableService implements ReviewRateableContract
      * @return float|null
      * @throws Exception
      */
-    public function averageRatingByDepartment(string $department, string $key, bool $approved = true): ?float
+    public function averageRatingByDepartment(string $department = "default", string $key = null, bool $approved = true): ?float
     {
         return $this->getModel()->averageRatingByDepartment($department, $key, $approved);
     }
@@ -127,7 +127,7 @@ class ReviewRateableService implements ReviewRateableContract
      * @return array
      * @throws Exception
      */
-    public function averageRatingsByDepartment(string $department, bool $approved = true): array
+    public function averageRatingsByDepartment(string $department = "default", bool $approved = true): array
     {
         return $this->getModel()->averageRatingsByDepartment($department, $approved);
     }
@@ -146,6 +146,21 @@ class ReviewRateableService implements ReviewRateableContract
     }
 
     /**
+     * Get all reviews (with attached ratings) for a department,
+     * filtered by the approved status.
+     *
+     * @param string $department
+     * @param bool $approved
+     * @param bool $withRatings
+     * @return Collection
+     * @throws Exception
+     */
+    public function getReviewsByDepartment(string $department = "default", bool $approved = true, bool $withRatings = true): Collection
+    {
+        return $this->getModel()->getReviewsByDepartment($department, $approved, $withRatings);
+    }
+
+    /**
      * Get the total number of ratings for the attached model.
      *
      * @param bool $approved
@@ -155,6 +170,19 @@ class ReviewRateableService implements ReviewRateableContract
     public function totalReviews(bool $approved = true): int
     {
         return $this->getModel()->reviewCount($approved);
+    }
+
+    /**
+     * Get the total number of reviews for the model by department.
+     *
+     * @param string $department
+     * @param bool $approved
+     * @return int
+     * @throws Exception
+     */
+    public function totalDepartmentReviews(string $department = "default", bool $approved = true): int
+    {
+        return $this->getModel()->totalReviews($department, $approved);
     }
 
     /**
@@ -174,9 +202,53 @@ class ReviewRateableService implements ReviewRateableContract
      * @return bool
      * @throws Exception
      */
-    public function deleteReview(int $reviewId): bool
+    public function deleteReview(int $reviewId = null): bool
     {
         return $this->getModel()->deleteReview($reviewId);
     }
 
+    /**
+     * Return an array of rating value ⇒ count, for the full model
+     * or for a given department.
+     *
+     * @param string|null $department
+     * @param bool $approved
+     * @return array
+     * @throws Exception
+     */
+    public function ratingCounts(?string $department = "default", bool $approved = true): array
+    {
+        return $this->getModel()->ratingCounts($department, $approved);
+    }
+
+    /**
+     * Return an array with:
+     *  • counts:     [1 => x, 2 => y, …, 5 => z]
+     *  • percentages: [1 => pct1, …, 5 => pct5]
+     *  • total:      total number of ratings
+     *
+     * @param string|null $department
+     * @param bool $approved
+     * @return array
+     * @throws Exception
+     */
+    public function ratingStats(?string $department = "default", bool $approved = true): array
+    {
+        return $this->getModel()->ratingStats($department, $approved);
+    }
+
+    /**
+     * Return reviews based on star ratings.
+     *
+     * @param int $starValue
+     * @param string|null $department
+     * @param bool $approved
+     * @param bool $withRatings
+     * @return Collection
+     * @throws Exception
+     */
+    public function getReviewsByRating(int $starValue = null, string $department = "default", bool $approved = true, bool $withRatings = true): Collection
+    {
+        return $this->getModel()->getReviewsByRating($starValue, $department, $approved, $withRatings);
+    }
 }

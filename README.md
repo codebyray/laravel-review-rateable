@@ -4,11 +4,12 @@
 NOTE: This is a complete rewrite from v1. It is not compatible with previous versions of this package.
 
 
-Laravel Review Ratable is a flexible package that enables you to attach reviews (with multiple ratings) to any Eloquent model in your Laravel application. The package supports multiple departments, configurable rating boundaries, review approval, and a decoupled service contract so you can easily integrate, test, and extend the functionality.
+Laravel Review Ratable is a flexible package that enables you to attach reviews (with multiple ratings) to any Eloquent model in your Laravel application. 
+The package supports multiple departments, configurable rating boundaries, review approval, and a decoupled service contract so you can easily integrate, test, and extend the functionality.
 
 ## Features
 
-- **Polymorphic Reviews & Ratings:** Attach written reviews along with multiple rating values to any model.
+- **Reviews & Ratings:** Attach written reviews along with multiple rating values to any model.
 - **Configurable Settings:** Define custom rating keys, labels, and value boundaries (min/max) via a config file.
 - **Department Support:** Organize ratings by department (e.g. default, sales, support) with their own criteria.
 - **Review Approval:** Set a default approval status for reviews (and override per review if needed).
@@ -46,7 +47,7 @@ php artisan migrate
 
 ## Configuration
 
-The package configuration file is located at config/laravel-review-ratable.php. Here you can adjust global settings such as:
+The package configuration file is located at config/review-ratable.php. Here you can adjust global settings such as:
 
 - Rating Value Boundaries:
     - min_rating_value: Minimum rating value.
@@ -139,7 +140,7 @@ $product = Product::findOrFail($productId);
 // Prepare the updated data.
 $data = [
     'review'     => 'Updated review text',    // New review text.
-    'department' => 'default',     // Optionally, change the department.
+    'department' => 'sales',       // Optionally, change the department.
     'recommend'  => false,         // Update recommendation flag.
     'approved'   => true,          // Update approval status if needed.
     'ratings'    => [
@@ -176,7 +177,7 @@ $product->deleteReview($reviewId);
 $product = Product::findOrFail($productId);
 
 // Get approved reviews (with related ratings)
-// Default: approved = true, withRatings = true
+// Default: approved: true, withRatings: true
 $product->getReviews();
 
 // Get not approved reviews (with related ratings)
@@ -187,6 +188,53 @@ $product->getReviews(approved: false);
 $product->getReviews(true, false);
 $product->getReviews(withRatings: false);
 ```
+
+### Fetch approved or not approved reviews/ratings by department
+```php
+// Approved reviews department with ratings
+$product = Product::findOrFail($productId);
+
+// Get approved reviews by department (with related ratings)
+// Default: approved: true, withRatings: true
+$product->getReviewsByDepartment("sales");
+
+// Get not approved reviews department (with related ratings)
+$product->getReviewsByDepartment("sales", false);
+$product->getReviewsByDepartment(department: "sales", approved: false);
+
+// Get approved reviews department (without related ratings)
+$product->getReviewsByDepartment("sales", true, false);
+$product->getReviewsByDepartment(department: "sales", withRatings: false);
+```
+
+### Get reviews/ratings based on a star rating.
+```php
+// Fetch the product
+$product = Product::findOrFail($productId);
+
+// Get approved reviews by star rating. The below call will return all 5-star 
+// reviews/ratings for the "support" department.
+// Defaults: starValue: null, department: "default", approved: true, withRatings: true
+$product->getReviewsByRating(5, department: "support");
+
+// If you only want the reviews and not the ratings, add withRatings: false:
+$product->getReviewsByRating(5, department: "support", withRatings: false);
+```
+
+### Get the total number of reviews.
+```php
+// Approved reviews department with ratings
+$product = Product::findOrFail($productId);
+
+// Get the total number of reviews for the reviewable resource.
+// Default: approved = true
+$product->totalReviews();
+
+// Get the total number of reviews for the reviewable resource by department.
+// Defaults: department = "default", approved = true
+$product->totalDepartmentReviews(department: "sales");
+```
+
 ### Fetch the average rating:
 ```php
 // Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
@@ -217,25 +265,68 @@ $overallRating = $product->overallAverageRating();
 // Returns float
 3.5
 ```
-### Get all reviews with or without ratings:
-```php
-// Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
-$product = Product::find($productId);
 
-// Get all approved reviews with their ratings eager loaded.
-$reviewsWithRatings = $product->getReviews(true, true);
-
-// Get all approved reviews without eager loading ratings.
-$reviewsWithoutRatings = $product->getReviews(true, false);
-```
-
-### Count total number of reviews:
+### Count the total number of reviews:
 ````php
 // Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
 $product = Product::find($productId);
 
 // Returns the total number of reviews.
 $totalReviews = $product->totalReviews();
+
+// Get the total for a specific department
+// Defaults: department: "default", approved = true
+$totalDepartmentReviews = $product->totalDepartmentReviews();
+````
+
+### Return an array of rating value ⇒ count, for the full model or for a given department.
+````php
+// Retrieve a Product instance (assuming Product uses the ReviewRatable trait)
+$product = Product::find($productId);
+
+// Returns the total number of ratings. 
+// Defaults: department: "default", approved = true
+$totalReviews = $product->ratingCounts();
+
+// Returns, where the array key is the star rating and the value is the total count
+array:5▼
+  1 => 0
+  2 => 1
+  3 => 8
+  4 => 0
+  5 => 3
+]
+````
+
+### Returns a muti-denominational array with ratings stats for a given department.
+````php
+// Retrieve a Product instance (assuming the Product uses the ReviewRatable trait)
+$product = Product::find($productId);
+
+// Get the stats for a given department or the default.
+// Defaults: department: "default", approved = true
+$totalReviews = $product->ratingStats();
+
+// Returns, where the "counts" array holds the count for each star rating.
+// And the "percentages" holds to percentage for each star rating.
+// Finally, the total number of star ratings is returned.
+array:3▼
+  "counts" => array:5 [▶
+    1 => 0
+    2 => 1
+    3 => 8
+    4 => 0
+    5 => 3
+  ]
+  "percentages" => array:5 [▶
+    1 => 0.0
+    2 => 8.0
+    3 => 67.0
+    4 => 0.0
+    5 => 25.0
+  ]
+  "total" => 12
+]
 ````
 
 ## Example Usage in a Controller
