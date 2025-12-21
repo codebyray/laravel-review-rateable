@@ -3,7 +3,9 @@
 namespace Codebyray\ReviewRateable\Tests;
 
 use Codebyray\ReviewRateable\Models\Review;
+use Codebyray\ReviewRateable\Services\ReviewRateableService;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Codebyray\ReviewRateable\Traits\ReviewRateable;
@@ -296,4 +298,90 @@ it('deletes a review successfully', function () use ($dummyModel) {
     // Delete the review by its ID.
     $deleted = $dummyInstance->deleteReview($review->id);
     expect($deleted)->toBeTrue();
+});
+
+it('returns false when updateReview is called without arguments', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Null Update']);
+
+    $result = $instance->updateReview();
+    expect($result)->toBeFalse();
+});
+
+it('returns false when approveReview is called without an id', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Null Approve']);
+
+    $result = $instance->approveReview();
+    expect($result)->toBeFalse();
+});
+
+it('returns false when deleteReview is called without an id', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Null Delete']);
+
+    $result = $instance->deleteReview();
+    expect($result)->toBeFalse();
+});
+
+it('handles getReviewsByRating called with no star value gracefully', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Null Star']);
+
+    $instance->addReview(
+        [
+            'review'   => 'Some review',
+            'approved' => true,
+            'ratings'  => ['overall' => 5],
+        ]
+    );
+
+    $reviews = $instance->getReviewsByRating();
+    expect($reviews)->toBeInstanceOf(Collection::class);
+});
+
+it('service addReview delegates to model', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Service Add']);
+    $service  = new ReviewRateableService();
+    $service->setModel($instance);
+
+    $review = $service->addReview(
+        [
+            'review'   => 'Via service',
+            'approved' => true,
+            'ratings'  => ['overall' => 5],
+        ], 1);
+
+    expect($review)->toBeInstanceOf(Review::class)
+        ->and($instance->reviews()->count())->toBe(1);
+});
+
+it('service updateReview delegates with id and data', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Service Update']);
+    $service  = new ReviewRateableService();
+    $service->setModel($instance);
+
+    $review = $instance->addReview(
+        [
+            'review'   => 'Original',
+            'approved' => true,
+            'ratings'  => ['overall' => 5],
+        ]
+    );
+
+    $result = $service->updateReview($review->id, [
+        'review'  => 'Updated via service',
+        'ratings' => ['overall' => 3],
+    ]);
+
+    expect($result)->toBeTrue();
+
+    $fresh = $instance->reviews()->find($review->id);
+    expect($fresh->review)->toEqual('Updated via service')
+        ->and($fresh->ratings()->first()->value)->toEqual(3);
+});
+
+it('throws when using service without setting model', function () {
+    $service = new ReviewRateableService();
+
+    $this->expectException(\Exception::class);
+    $this->expectExceptionMessage('No model set in ReviewRateableService');
+
+    $service->getReviews();
 });

@@ -5,7 +5,7 @@ namespace Codebyray\ReviewRateable\Traits;
 use Codebyray\ReviewRateable\Models\Rating;
 use Codebyray\ReviewRateable\Models\Review;
 use Illuminate\Database\Eloquent\Collection;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 trait ReviewRateable
 {
@@ -28,7 +28,7 @@ trait ReviewRateable
      *  - 'ratings': An associative array of rating values.
      *
      * @param  array      $data
-     * @param int|null $userId
+     * @param  int|null   $userId
      * @return Review
      */
     public function addReview(array $data, ?int $userId = null): Review
@@ -50,7 +50,7 @@ trait ReviewRateable
         );
 
         // Get allowed rating keys for the specified department.
-        $departments = config('review-rateable.departments', []);
+        $departments   = config('review-rateable.departments', []);
         $configRatings = $departments[$department]['ratings'] ?? [];
 
         // Get global min and max rating values.
@@ -91,12 +91,16 @@ trait ReviewRateable
      *  - 'approved': New approval status.
      *  - 'ratings': An associative array of rating values (key => value).
      *
-     * @param int   $reviewId
-     * @param array $data
-     * @return bool  True on success, false if the review was not found.
+     * @param int|null   $reviewId
+     * @param array|null $data
+     * @return bool  True on success, false if the review was not found or invalid input.
      */
-    public function updateReview(int $reviewId = null, array $data = null): bool
+    public function updateReview(?int $reviewId = null, ?array $data = null): bool
     {
+        if ($reviewId === null || $data === null) {
+            return false;
+        }
+
         $review = $this->reviews()->find($reviewId);
 
         if (!$review) {
@@ -124,8 +128,8 @@ trait ReviewRateable
         // Update ratings if provided.
         if (isset($data['ratings']) && is_array($data['ratings'])) {
             // Determine which department's rating keys to use.
-            $department = $attributes['department'] ?? $review->department;
-            $departments = config('review-rateable.departments', []);
+            $department    = $attributes['department'] ?? $review->department;
+            $departments   = config('review-rateable.departments', []);
             $configRatings = $departments[$department]['ratings'] ?? [];
 
             // Get global min and max rating values.
@@ -156,32 +160,39 @@ trait ReviewRateable
     /**
      * Mark a review as approved by its ID.
      *
-     * @param int $reviewId
+     * @param int|null $reviewId
      * @return bool True if the update was successful, false if the review was not found.
      */
-    public function approveReview(int $reviewId = null): bool
+    public function approveReview(?int $reviewId = null): bool
     {
+        if ($reviewId === null) {
+            return false;
+        }
+
         $review = $this->reviews()->find($reviewId);
         if (!$review) {
             return false;
         }
+
         return $review->update(['approved' => true]);
     }
 
     /**
      * Calculate the average rating for a given key, filtering reviews by approval.
      *
-     * @param string $key
-     * @param bool $approved
+     * @param string|null $key
+     * @param bool        $approved
      * @return float|null
      */
-    public function averageRating(string $key = null, bool $approved = true): ?float
+    public function averageRating(?string $key = null, bool $approved = true): ?float
     {
         return $this->reviews()
             ->where('approved', $approved)
-            ->whereHas('ratings', function ($query) use ($key) {
-                $query->where('key', $key);
-            })
+            ->whereHas(
+                'ratings', function ($query) use ($key) {
+                    $query->where('key', $key);
+                }
+            )
             ->with('ratings')
             ->get()
             ->pluck('ratings')
@@ -204,15 +215,17 @@ trait ReviewRateable
             ->where('approved', $approved)
             ->with('ratings')
             ->get()
-            ->each(function ($review) use (&$averages) {
-                foreach ($review->ratings as $rating) {
-                    if (!isset($averages[$rating->key])) {
-                        $averages[$rating->key] = ['sum' => 0, 'count' => 0];
+            ->each(
+                function ($review) use (&$averages) {
+                    foreach ($review->ratings as $rating) {
+                        if (!isset($averages[$rating->key])) {
+                            $averages[$rating->key] = ['sum' => 0, 'count' => 0];
+                        }
+                        $averages[$rating->key]['sum'] += $rating->value;
+                        $averages[$rating->key]['count']++;
                     }
-                    $averages[$rating->key]['sum'] += $rating->value;
-                    $averages[$rating->key]['count']++;
                 }
-            });
+            );
 
         foreach ($averages as $key => $data) {
             $averages[$key] = $data['count'] ? $data['sum'] / $data['count'] : null;
@@ -225,19 +238,24 @@ trait ReviewRateable
      * Calculate the average rating for a given key within a department,
      * filtering reviews by approval.
      *
-     * @param string $department
-     * @param string $key
-     * @param bool $approved
+     * @param string      $department
+     * @param string|null $key
+     * @param bool        $approved
      * @return float|null
      */
-    public function averageRatingByDepartment(string $department = "default", string $key = null, bool $approved = true): ?float
-    {
+    public function averageRatingByDepartment(
+        string $department = 'default',
+        ?string $key = null,
+        bool $approved = true
+    ): ?float {
         return $this->reviews()
             ->where('department', $department)
             ->where('approved', $approved)
-            ->whereHas('ratings', function ($query) use ($key) {
-                $query->where('key', $key);
-            })
+            ->whereHas(
+                'ratings', function ($query) use ($key) {
+                    $query->where('key', $key);
+                }
+            )
             ->with('ratings')
             ->get()
             ->pluck('ratings')
@@ -251,10 +269,10 @@ trait ReviewRateable
      * filtering reviews by approval.
      *
      * @param string $department
-     * @param bool $approved
+     * @param bool   $approved
      * @return array  Format: ['overall' => 4.5, 'quality' => 4.0, ...]
      */
-    public function averageRatingsByDepartment(string $department = "default", bool $approved = true): array
+    public function averageRatingsByDepartment(string $department = 'default', bool $approved = true): array
     {
         $averages = [];
 
@@ -263,15 +281,17 @@ trait ReviewRateable
             ->where('approved', $approved)
             ->with('ratings')
             ->get()
-            ->each(function ($review) use (&$averages) {
-                foreach ($review->ratings as $rating) {
-                    if (!isset($averages[$rating->key])) {
-                        $averages[$rating->key] = ['sum' => 0, 'count' => 0];
+            ->each(
+                function ($review) use (&$averages) {
+                    foreach ($review->ratings as $rating) {
+                        if (!isset($averages[$rating->key])) {
+                            $averages[$rating->key] = ['sum' => 0, 'count' => 0];
+                        }
+                        $averages[$rating->key]['sum'] += $rating->value;
+                        $averages[$rating->key]['count']++;
                     }
-                    $averages[$rating->key]['sum'] += $rating->value;
-                    $averages[$rating->key]['count']++;
                 }
-            });
+            );
 
         foreach ($averages as $key => $data) {
             $averages[$key] = $data['count'] ? $data['sum'] / $data['count'] : null;
@@ -304,12 +324,15 @@ trait ReviewRateable
      * filtered by the approved status.
      *
      * @param string $department
-     * @param bool $approved
-     * @param bool $withRatings
+     * @param bool   $approved
+     * @param bool   $withRatings
      * @return Collection
      */
-    public function getReviewsByDepartment(string $department = "default", bool $approved = true, bool $withRatings = true): Collection
-    {
+    public function getReviewsByDepartment(
+        string $department = 'default',
+        bool $approved = true,
+        bool $withRatings = true
+    ): Collection {
         $query = $this->reviews()
             ->where('department', $department)
             ->where('approved', $approved);
@@ -336,10 +359,10 @@ trait ReviewRateable
      * Get the total number of reviews for the model by department.
      *
      * @param string $department
-     * @param bool $approved
+     * @param bool   $approved
      * @return int
      */
-    public function totalDepartmentReviews(string $department = "default", bool $approved = true): int
+    public function totalDepartmentReviews(string $department = 'default', bool $approved = true): int
     {
         return $this->reviews()
             ->where('department', $department)
@@ -368,11 +391,15 @@ trait ReviewRateable
     /**
      * Delete a review by its ID.
      *
-     * @param int $reviewId
+     * @param int|null $reviewId
      * @return bool True if the review was deleted, false otherwise.
      */
-    public function deleteReview(int $reviewId = null): bool
+    public function deleteReview(?int $reviewId = null): bool
     {
+        if ($reviewId === null) {
+            return false;
+        }
+
         $review = $this->reviews()->find($reviewId);
 
         if ($review) {
@@ -386,22 +413,22 @@ trait ReviewRateable
      * Return an array of rating value ⇒ count, for the full model
      * or for a given department.
      *
-     * @param  string|null  $department  If null, counts across all departments.
-     * @param  bool         $approved    Only count approved reviews?
+     * @param  string|null $department  If null, counts across all departments.
+     * @param  bool        $approved    Only count approved reviews?
      * @return array        [1 => 12, 2 => 5, 3 => 23, 4 => 17, 5 => 42]
      */
-    public function ratingCounts(?string $department = "default", bool $approved = true): array
+    public function ratingCounts(?string $department = 'default', bool $approved = true): array
     {
         $min         = config('review-rateable.min_rating_value', 1);
         $max         = config('review-rateable.max_rating_value', 5);
-        $reviewTable = (new Review)->getTable();
-        $ratingTable = (new Rating)->getTable();
+        $reviewTable = (new Review())->getTable();
+        $ratingTable = (new Rating())->getTable();
 
         $query = Rating::select("{$ratingTable}.value", DB::raw('COUNT(*) as total'))
             ->join($reviewTable, "{$ratingTable}.review_id", '=', "{$reviewTable}.id")
             ->where("{$reviewTable}.reviewable_type", $this->getMorphClass())
-            ->where("{$reviewTable}.reviewable_id",   $this->getKey())
-            ->where("{$reviewTable}.approved",        $approved);
+            ->where("{$reviewTable}.reviewable_id", $this->getKey())
+            ->where("{$reviewTable}.approved", $approved);
 
         if ($department) {
             $query->where("{$reviewTable}.department", $department);
@@ -427,23 +454,23 @@ trait ReviewRateable
      *  • percentages: [1 => pct1, …, 5 => pct5]
      *  • total: total number of ratings
      *
-     * @param  string|null  $department
-     * @param  bool         $approved
+     * @param  string|null $department
+     * @param  bool        $approved
      * @return array
      */
-    public function ratingStats(?string $department = "default", bool $approved = true): array
+    public function ratingStats(?string $department = 'default', bool $approved = true): array
     {
         $min         = config('review-rateable.min_rating_value', 1);
         $max         = config('review-rateable.max_rating_value', 5);
-        $reviewTable = (new Review)->getTable();
-        $ratingTable = (new Rating)->getTable();
+        $reviewTable = (new Review())->getTable();
+        $ratingTable = (new Rating())->getTable();
 
         // base query: gives you value => count
         $raw = Rating::select("{$ratingTable}.value", DB::raw('COUNT(*) as count'))
             ->join($reviewTable, "{$ratingTable}.review_id", '=', "{$reviewTable}.id")
             ->where("{$reviewTable}.reviewable_type", $this->getMorphClass())
-            ->where("{$reviewTable}.reviewable_id",   $this->getKey())
-            ->where("{$reviewTable}.approved",        $approved)
+            ->where("{$reviewTable}.reviewable_id", $this->getKey())
+            ->where("{$reviewTable}.approved", $approved)
             ->when($department, fn($q) => $q->where("{$reviewTable}.department", $department))
             ->groupBy("{$ratingTable}.value")
             ->pluck('count', 'value')
@@ -476,19 +503,24 @@ trait ReviewRateable
     /**
      * Return reviews based on star ratings.
      *
-     * @param int $starValue
-     * @param string|null $department
+     * @param int|null $starValue
+     * @param string $department
      * @param bool $approved
      * @param bool $withRatings
+     *
      * @return Collection
      */
-    public function getReviewsByRating(int $starValue = null, string $department = "default", bool $approved = true, bool $withRatings = true): Collection
-    {
+    public function getReviewsByRating(
+        ?int $starValue = null,
+        string $department = 'default',
+        bool $approved = true,
+        bool $withRatings = true
+    ): Collection {
         $query = $this->reviews()
             ->when($approved, fn($q) => $q->where('approved', $approved))
             ->when($department, fn($q) => $q->where('department', $department))
-            ->whereHas('ratings', fn($q) =>
-            $q->where('value', $starValue)
+            ->whereHas(
+                'ratings', fn($q) => $q->where('value', $starValue)
             );
 
         if ($withRatings) {
