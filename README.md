@@ -19,7 +19,7 @@ The package supports multiple departments, configurable rating boundaries, revie
 ## Requirements
 
 - PHP 8.1 or higher
-- Laravel 10, 11, or 12
+- Laravel 10, 11, 12 or 13
 
 ## Installation
 
