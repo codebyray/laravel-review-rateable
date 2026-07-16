@@ -4,20 +4,20 @@ namespace Codebyray\ReviewRateable\Tests;
 
 use Codebyray\ReviewRateable\Models\Review;
 use Codebyray\ReviewRateable\Services\ReviewRateableService;
+use Codebyray\ReviewRateable\Traits\ReviewRateable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Eloquent\Model;
-use Codebyray\ReviewRateable\Traits\ReviewRateable;
 
 // Set up an in-memory database and create the necessary tables.
 beforeEach(function () {
     // Configure the in-memory SQLite connection.
     config()->set('database.default', 'testing');
     config()->set('database.connections.testing', [
-        'driver'   => 'sqlite',
+        'driver' => 'sqlite',
         'database' => ':memory:',
-        'prefix'   => '',
+        'prefix' => '',
     ]);
 
     // Create the reviews table.
@@ -51,9 +51,12 @@ beforeEach(function () {
 });
 
 // Create a dummy model that uses the ReviewRateable trait.
-$dummyModel = new class extends Model {
+$dummyModel = new class extends Model
+{
     use ReviewRateable;
+
     protected $table = 'dummy_models';
+
     protected $guarded = [];
 };
 
@@ -69,10 +72,10 @@ it('adds a review with ratings successfully', function () use ($dummyModel) {
             'recommend' => true,
             'approved' => true,
             'ratings' => [
-              'overall' => 5,
-              'customer_service' => 4,
-              'quality' => 5,
-              'price' => 3,
+                'overall' => 5,
+                'customer_service' => 4,
+                'quality' => 5,
+                'price' => 3,
             ],
         ], 1
     );
@@ -121,9 +124,9 @@ it('updates a review and its ratings successfully', function () use ($dummyModel
     // Add an approved review with a rating.
     $review = $instance->addReview(
         [
-            'review'   => 'Original review text',
+            'review' => 'Original review text',
             'approved' => true,
-            'ratings'  => [
+            'ratings' => [
                 'overall' => 5,
             ],
         ]
@@ -152,9 +155,9 @@ it('approves a review successfully', function () use ($dummyModel) {
     // Add a review that is initially not approved.
     $review = $instance->addReview(
         [
-            'review'   => 'Review pending approval',
+            'review' => 'Review pending approval',
             'approved' => false,
-            'ratings'  => [
+            'ratings' => [
                 'overall' => 4,
             ],
         ]
@@ -169,7 +172,7 @@ it('approves a review successfully', function () use ($dummyModel) {
 
     // Retrieve the review from the database and verify that it's approved.
     $approvedReview = $instance->reviews()->find($review->id);
-    expect((bool)$approvedReview->approved)->toBeTrue();
+    expect((bool) $approvedReview->approved)->toBeTrue();
 });
 
 it('retrieves approved reviews with ratings by default', function () use ($dummyModel) {
@@ -179,9 +182,9 @@ it('retrieves approved reviews with ratings by default', function () use ($dummy
     // Add an approved review with ratings.
     $dummyInstance->addReview(
         [
-            'review'   => 'Approved review',
+            'review' => 'Approved review',
             'approved' => true,
-            'ratings'  => [
+            'ratings' => [
                 'overall' => 5,
             ],
         ]
@@ -190,9 +193,9 @@ it('retrieves approved reviews with ratings by default', function () use ($dummy
     // Add a non-approved review.
     $dummyInstance->addReview(
         [
-            'review'   => 'Not approved review',
+            'review' => 'Not approved review',
             'approved' => false,
-            'ratings'  => [
+            'ratings' => [
                 'overall' => 3,
             ],
         ]
@@ -211,9 +214,9 @@ it('retrieves reviews without ratings when withRatings is false', function () us
     // Add an approved review.
     $dummyInstance->addReview(
         [
-            'review'   => 'Review without eager loaded ratings',
+            'review' => 'Review without eager loaded ratings',
             'approved' => true,
-            'ratings'  => [
+            'ratings' => [
                 'overall' => 4,
             ],
         ]
@@ -231,9 +234,9 @@ it('retrieves reviews filtered by approved flag', function () use ($dummyModel) 
 
     $dummyInstance->addReview(
         [
-            'review'   => 'Approved review',
+            'review' => 'Approved review',
             'approved' => true,
-            'ratings'  => [
+            'ratings' => [
                 'overall' => 5,
             ],
         ]
@@ -241,9 +244,9 @@ it('retrieves reviews filtered by approved flag', function () use ($dummyModel) 
 
     $dummyInstance->addReview(
         [
-            'review'   => 'Not approved review',
+            'review' => 'Not approved review',
             'approved' => false,
-            'ratings'  => [
+            'ratings' => [
                 'overall' => 2,
             ],
         ]
@@ -263,9 +266,9 @@ it('allows service getReviews to delegate with parameters correctly', function (
 
     $dummyInstance->addReview(
         [
-            'review'   => 'Review with ratings',
+            'review' => 'Review with ratings',
             'approved' => true,
-            'ratings'  => [
+            'ratings' => [
                 'overall' => 4,
             ],
         ]
@@ -287,9 +290,9 @@ it('deletes a review successfully', function () use ($dummyModel) {
     // Add an approved review with ratings.
     $review = $dummyInstance->addReview(
         [
-            'review'   => 'Review to delete',
+            'review' => 'Review to delete',
             'approved' => true,
-            'ratings'  => [
+            'ratings' => [
                 'overall' => 5,
             ],
         ]
@@ -326,9 +329,9 @@ it('handles getReviewsByRating called with no star value gracefully', function (
 
     $instance->addReview(
         [
-            'review'   => 'Some review',
+            'review' => 'Some review',
             'approved' => true,
-            'ratings'  => ['overall' => 5],
+            'ratings' => ['overall' => 5],
         ]
     );
 
@@ -338,14 +341,14 @@ it('handles getReviewsByRating called with no star value gracefully', function (
 
 it('service addReview delegates to model', function () use ($dummyModel) {
     $instance = $dummyModel::create(['name' => 'Service Add']);
-    $service  = new ReviewRateableService();
+    $service = new ReviewRateableService;
     $service->setModel($instance);
 
     $review = $service->addReview(
         [
-            'review'   => 'Via service',
+            'review' => 'Via service',
             'approved' => true,
-            'ratings'  => ['overall' => 5],
+            'ratings' => ['overall' => 5],
         ], 1);
 
     expect($review)->toBeInstanceOf(Review::class)
@@ -354,19 +357,19 @@ it('service addReview delegates to model', function () use ($dummyModel) {
 
 it('service updateReview delegates with id and data', function () use ($dummyModel) {
     $instance = $dummyModel::create(['name' => 'Service Update']);
-    $service  = new ReviewRateableService();
+    $service = new ReviewRateableService;
     $service->setModel($instance);
 
     $review = $instance->addReview(
         [
-            'review'   => 'Original',
+            'review' => 'Original',
             'approved' => true,
-            'ratings'  => ['overall' => 5],
+            'ratings' => ['overall' => 5],
         ]
     );
 
     $result = $service->updateReview($review->id, [
-        'review'  => 'Updated via service',
+        'review' => 'Updated via service',
         'ratings' => ['overall' => 3],
     ]);
 
@@ -378,10 +381,81 @@ it('service updateReview delegates with id and data', function () use ($dummyMod
 });
 
 it('throws when using service without setting model', function () {
-    $service = new ReviewRateableService();
+    $service = new ReviewRateableService;
 
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('No model set in ReviewRateableService');
 
     $service->getReviews();
+});
+
+it('calculates average ratings correctly using database queries', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Test Averages']);
+
+    // Review 1: 5 stars
+    $instance->addReview([
+        'review' => 'Great!',
+        'approved' => true,
+        'department' => 'default',
+        'ratings' => ['overall' => 5, 'quality' => 5],
+    ]);
+
+    // Review 2: 3 stars
+    $instance->addReview([
+        'review' => 'Okay.',
+        'approved' => true,
+        'department' => 'default',
+        'ratings' => ['overall' => 3, 'quality' => 1],
+    ]);
+
+    // Review 3: Unapproved (should be ignored by default)
+    $instance->addReview([
+        'review' => 'Terrible.',
+        'approved' => false,
+        'department' => 'default',
+        'ratings' => ['overall' => 1, 'quality' => 1],
+    ]);
+
+    // Test overall average: (5 + 3 + 5 + 1) / 4 = 14 / 4 = 3.5
+    expect($instance->overallAverageRating())->toEqual(3.5);
+
+    // Test specific key average: (5 + 3) / 2 = 4.0
+    expect($instance->averageRating('overall'))->toEqual(4.0);
+
+    // Test grouped averages
+    $averages = $instance->averageRatings();
+    expect($averages)->toHaveKey('overall', 4.0)
+        ->and($averages)->toHaveKey('quality', 3.0)
+        ->and($instance->averageRatingByDepartment('default', 'overall'))->toEqual(4.0);
+});
+
+it('counts total reviews correctly through the service', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Test Counts']);
+    $service = new ReviewRateableService;
+    $service->setModel($instance);
+
+    $instance->addReview(['review' => 'R1', 'approved' => true, 'department' => 'sales']);
+    $instance->addReview(['review' => 'R2', 'approved' => true, 'department' => 'sales']);
+    $instance->addReview(['review' => 'R3', 'approved' => true, 'department' => 'support']);
+
+    // Unapproved shouldn't be counted by default
+    $instance->addReview(['review' => 'R4', 'approved' => false, 'department' => 'sales']);
+
+    expect($service->totalReviews())->toEqual(3)
+        ->and($service->totalDepartmentReviews('sales'))->toEqual(2)
+        ->and($service->totalDepartmentReviews('support'))->toEqual(1);
+});
+
+it('attaches a user ID to the review when provided', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Test User ID']);
+
+    $review = $instance->addReview(
+        [
+            'review' => 'Review by user 99',
+            'approved' => true,
+        ],
+        99 // Passing the optional $userId parameter
+    );
+
+    expect($review->user_id)->toEqual(99);
 });

@@ -15,9 +15,6 @@ class ReviewRateableService implements ReviewRateableContract
 
     /**
      * Set the model instance to operate on.
-     *
-     * @param  mixed $model
-     * @return self
      */
     public function setModel(mixed $model): self
     {
@@ -29,13 +26,12 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Retrieve the model instance or throw an exception.
      *
-     * @return mixed
      * @throws Exception
      */
     protected function getModel(): mixed
     {
         if ($this->model === null) {
-            throw new Exception("No model set in ReviewRateableService. Please call setModel() first.");
+            throw new Exception('No model set in ReviewRateableService. Please call setModel() first.');
         }
 
         return $this->model;
@@ -44,9 +40,8 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Delegate adding a review to the model.
      *
-     * @param  array     $data
-     * @param  int|null  $userId
      * @return ReviewRateableContract
+     *
      * @throws Exception
      */
     public function addReview(array $data, ?int $userId = null): mixed
@@ -57,9 +52,8 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Update a review and its ratings by review ID.
      *
-     * @param  int|null   $reviewId
-     * @param  array|null $data
-     * @return bool  True on success, false if the review was not found.
+     * @return bool True on success, false if the review was not found.
+     *
      * @throws Exception
      */
     public function updateReview(?int $reviewId = null, ?array $data = null): bool
@@ -70,8 +64,6 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Delegate approving a review.
      *
-     * @param  int|null $reviewId
-     * @return bool
      * @throws Exception
      */
     public function approveReview(?int $reviewId = null): bool
@@ -82,9 +74,6 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Delegate averageRating calculation to the model.
      *
-     * @param  string|null $key
-     * @param  bool        $approved
-     * @return float|null
      * @throws Exception
      */
     public function averageRating(?string $key = null, bool $approved = true): ?float
@@ -95,8 +84,6 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Delegate averageRatings calculation to the model.
      *
-     * @param  bool $approved
-     * @return array
      * @throws Exception
      */
     public function averageRatings(bool $approved = true): array
@@ -107,14 +94,10 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Delegate averageRatingByDepartment calculation to the model.
      *
-     * @param  string      $department
-     * @param  string|null $key
-     * @param  bool        $approved
-     * @return float|null
      * @throws Exception
      */
     public function averageRatingByDepartment(
-        string $department = "default",
+        string $department = 'default',
         ?string $key = null,
         bool $approved = true
     ): ?float {
@@ -124,12 +107,9 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Delegate averageRatingsByDepartment calculation to the model.
      *
-     * @param  string $department
-     * @param  bool   $approved
-     * @return array
      * @throws Exception
      */
-    public function averageRatingsByDepartment(string $department = "default", bool $approved = true): array
+    public function averageRatingsByDepartment(string $department = 'default', bool $approved = true): array
     {
         return $this->getModel()->averageRatingsByDepartment($department, $approved);
     }
@@ -137,9 +117,6 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Get all reviews (with attached ratings) for the attached model.
      *
-     * @param  bool $approved
-     * @param  bool $withRatings
-     * @return Collection
      * @throws Exception
      */
     public function getReviews(bool $approved = true, bool $withRatings = true): Collection
@@ -151,14 +128,10 @@ class ReviewRateableService implements ReviewRateableContract
      * Get all reviews (with attached ratings) for a department,
      * filtered by the approved status.
      *
-     * @param  string $department
-     * @param  bool   $approved
-     * @param  bool   $withRatings
-     * @return Collection
      * @throws Exception
      */
     public function getReviewsByDepartment(
-        string $department = "default",
+        string $department = 'default',
         bool $approved = true,
         bool $withRatings = true
     ): Collection {
@@ -168,33 +141,26 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Get the total number of ratings for the attached model.
      *
-     * @param  bool $approved
-     * @return int
      * @throws Exception
      */
     public function totalReviews(bool $approved = true): int
     {
-        return $this->getModel()->reviewCount($approved);
+        return $this->getModel()->totalReviews($approved);
     }
 
     /**
      * Get the total number of reviews for the model by department.
      *
-     * @param  string $department
-     * @param  bool   $approved
-     * @return int
      * @throws Exception
      */
-    public function totalDepartmentReviews(string $department = "default", bool $approved = true): int
+    public function totalDepartmentReviews(string $department = 'default', bool $approved = true): int
     {
-        return $this->getModel()->totalReviews($department, $approved);
+        return $this->getModel()->totalDepartmentReviews($department, $approved);
     }
 
     /**
      * Get the overall average rating for all ratings attached to the model.
      *
-     * @param  bool $approved
-     * @return float|null
      * @throws Exception
      */
     public function overallAverageRating(bool $approved = true): ?float
@@ -205,8 +171,6 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Delete a review.
      *
-     * @param  int|null $reviewId
-     * @return bool
      * @throws Exception
      */
     public function deleteReview(?int $reviewId = null): bool
@@ -218,12 +182,9 @@ class ReviewRateableService implements ReviewRateableContract
      * Return an array of rating value ⇒ count, for the full model
      * or for a given department.
      *
-     * @param  string|null $department
-     * @param  bool        $approved
-     * @return array
      * @throws Exception
      */
-    public function ratingCounts(?string $department = "default", bool $approved = true): array
+    public function ratingCounts(?string $department = 'default', bool $approved = true): array
     {
         return $this->getModel()->ratingCounts($department, $approved);
     }
@@ -234,12 +195,9 @@ class ReviewRateableService implements ReviewRateableContract
      *  • percentages: [1 => pct1, …, 5 => pct5]
      *  • total:      total number of ratings
      *
-     * @param  string|null $department
-     * @param  bool        $approved
-     * @return array
      * @throws Exception
      */
-    public function ratingStats(?string $department = "default", bool $approved = true): array
+    public function ratingStats(?string $department = 'default', bool $approved = true): array
     {
         return $this->getModel()->ratingStats($department, $approved);
     }
@@ -247,16 +205,11 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Return reviews based on star ratings.
      *
-     * @param  int|null    $starValue
-     * @param  string      $department
-     * @param  bool        $approved
-     * @param  bool        $withRatings
-     * @return Collection
      * @throws Exception
      */
     public function getReviewsByRating(
         ?int $starValue = null,
-        string $department = "default",
+        string $department = 'default',
         bool $approved = true,
         bool $withRatings = true
     ): Collection {
