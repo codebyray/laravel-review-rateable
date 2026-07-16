@@ -4,6 +4,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | User Model
+    |--------------------------------------------------------------------------
+    |
+    | Define the model class that represents your users. This is used for the
+    | relationship between reviews and the user who posted them.
+    |
+    */
+    'user_model' => \App\Models\User::class,
+
+    /*
+    |--------------------------------------------------------------------------
     | Rating Value Boundaries
     |--------------------------------------------------------------------------
     |
@@ -38,25 +49,25 @@ return [
     'departments' => [
         'default' => [
             'ratings' => [
-                'overall'          => 'Overall Rating',
+                'overall' => 'Overall Rating',
                 'customer_service' => 'Customer Service Rating',
-                'quality'          => 'Quality Rating',
-                'price'            => 'Price Rating',
+                'quality' => 'Quality Rating',
+                'price' => 'Price Rating',
             ],
         ],
         'sales' => [
             'ratings' => [
-                'overall'        => 'Overall Rating',
-                'communication'  => 'Communication Rating',
-                'follow_up'      => 'Follow-Up Rating',
-                'price'          => 'Price Rating',
+                'overall' => 'Overall Rating',
+                'communication' => 'Communication Rating',
+                'follow_up' => 'Follow-Up Rating',
+                'price' => 'Price Rating',
             ],
         ],
         'support' => [
             'ratings' => [
-                'overall'        => 'Overall Rating',
-                'speed'          => 'Response Speed',
-                'knowledge'      => 'Knowledge Rating',
+                'overall' => 'Overall Rating',
+                'speed' => 'Response Speed',
+                'knowledge' => 'Knowledge Rating',
             ],
         ],
     ],
