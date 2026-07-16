@@ -1,6 +1,6 @@
 {
     "name": "codebyray/laravel-review-rateable",
-    "description": "Review & Rating system for Laravel 10, 11 & 12",
+    "description": "Review & Rating system for Laravel 10, 11, 12 & 13",
     "keywords": [
         "rating",
         "Ratable",
@@ -12,7 +12,8 @@
     "authors": [
         {
             "name": "CodebyRay",
-            "email": "dev@codebyray.com"
+            "email": "dev@codebyray.com",
+            "homepage": "https://codebyrj.com"
         }
     ],
     "minimum-stability": "dev",
@@ -20,7 +21,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "http://github.com/codebyray/laravel-review-rateable"
+            "url": "https://github.com/codebyray/laravel-review-rateable"
         }
     ],
     "require": {
