@@ -38,4 +38,8 @@ class Review extends Model
         return $query->where('approved', true);
     }
 
+     public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
