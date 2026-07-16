@@ -4,6 +4,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | User Model
+    |--------------------------------------------------------------------------
+    |
+    | Define the model class that represents your users. This is used for the
+    | relationship between reviews and the user who posted them.
+    |
+    */
+    'user_model' => \App\Models\User::class,
+
+    /*
+    |--------------------------------------------------------------------------
     | Rating Value Boundaries
     |--------------------------------------------------------------------------
     |
