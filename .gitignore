@@ -1,5 +1,11 @@
-vendor/
-.idea/
-composer.lock
-.php_cs.cache
-build/
+/vendor/
+/composer.lock
+/.idea/
+/.vscode/
+/.phpunit.cache/
+/.phpunit.result.cache
+/.php_cs.cache
+/coverage/
+/build/
+.DS_Store
+._*
