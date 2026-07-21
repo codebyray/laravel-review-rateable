@@ -2,7 +2,7 @@
 
 All notable changes to `laravel-review-rateable` will be documented here.
 
-## Unreleased
+## 2.1.4 - 2026-07-21
 
 ### Fixed
 
