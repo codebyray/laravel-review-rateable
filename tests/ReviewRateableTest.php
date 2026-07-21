@@ -2,12 +2,15 @@
 
 namespace Codebyray\ReviewRateable\Tests;
 
+use Codebyray\ReviewRateable\Contracts\ReviewRateableContract;
 use Codebyray\ReviewRateable\Models\Review;
 use Codebyray\ReviewRateable\Services\ReviewRateableService;
 use Codebyray\ReviewRateable\Traits\ReviewRateable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 // Set up an in-memory database and create the necessary tables.
@@ -458,4 +461,156 @@ it('attaches a user ID to the review when provided', function () use ($dummyMode
     );
 
     expect($review->user_id)->toEqual(99);
+});
+
+it('filters unapproved reviews by rating', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Approval Filter']);
+
+    $instance->addReview([
+        'review' => 'Approved',
+        'approved' => true,
+        'ratings' => ['overall' => 5],
+    ]);
+
+    $unapproved = $instance->addReview([
+        'review' => 'Unapproved',
+        'approved' => false,
+        'ratings' => ['overall' => 5],
+    ]);
+
+    $reviews = $instance->getReviewsByRating(5, approved: false);
+
+    expect($reviews)->toHaveCount(1)
+        ->and($reviews->first()->is($unapproved))->toBeTrue();
+});
+
+it('resolves independent review rateable service instances', function () {
+    $first = app(ReviewRateableContract::class);
+    $second = app(ReviewRateableContract::class);
+
+    expect($first)->toBeInstanceOf(ReviewRateableService::class)
+        ->and($second)->toBeInstanceOf(ReviewRateableService::class)
+        ->and($first)->not->toBe($second);
+});
+
+it('casts review booleans and rating values consistently', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Casts']);
+    $review = $instance->addReview([
+        'approved' => true,
+        'recommend' => false,
+        'ratings' => ['overall' => 5],
+    ])->fresh();
+
+    expect($review->approved)->toBeTrue()
+        ->and($review->recommend)->toBeFalse()
+        ->and($review->ratings()->first()->value)->toBeInt();
+});
+
+it('removes ratings that do not belong to a changed department', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Department Change']);
+    $review = $instance->addReview([
+        'department' => 'sales',
+        'ratings' => [
+            'overall' => 4,
+            'communication' => 3,
+            'price' => 2,
+        ],
+    ]);
+
+    $updated = $instance->updateReview($review->id, [
+        'department' => 'support',
+        'ratings' => [
+            'overall' => 5,
+            'speed' => 4,
+            'price' => 1,
+        ],
+    ]);
+
+    expect($updated)->toBeTrue()
+        ->and($review->fresh()->ratings()->pluck('value', 'key')->all())->toBe([
+            'overall' => 5,
+            'speed' => 4,
+        ]);
+});
+
+it('rolls back a review when a rating cannot be saved', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Transaction']);
+
+    DB::statement(<<<'SQL'
+        CREATE TRIGGER fail_rating_insert
+        BEFORE INSERT ON ratings
+        BEGIN
+            SELECT RAISE(FAIL, 'rating insert failed');
+        END
+        SQL);
+
+    expect(fn () => $instance->addReview([
+        'review' => 'Must roll back',
+        'ratings' => ['overall' => 5],
+    ]))->toThrow(QueryException::class);
+
+    expect($instance->reviews()->count())->toBe(0);
+});
+
+it('runs rating aggregates on the reviewable model connection', function () {
+    config()->set('database.connections.tenant', [
+        'driver' => 'sqlite',
+        'database' => ':memory:',
+        'prefix' => '',
+    ]);
+
+    Schema::connection('tenant')->create('reviews', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('reviewable_id');
+        $table->string('reviewable_type');
+        $table->unsignedBigInteger('user_id')->nullable();
+        $table->text('review')->nullable();
+        $table->string('department')->default('default');
+        $table->boolean('recommend')->default(false);
+        $table->boolean('approved')->default(false);
+        $table->timestamps();
+    });
+
+    Schema::connection('tenant')->create('ratings', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('review_id');
+        $table->string('key');
+        $table->unsignedTinyInteger('value');
+        $table->timestamps();
+    });
+
+    Schema::connection('tenant')->create('tenant_models', function (Blueprint $table) {
+        $table->id();
+        $table->timestamps();
+    });
+
+    $tenantModel = new class extends Model
+    {
+        use ReviewRateable;
+
+        protected $table = 'tenant_models';
+
+        protected $guarded = [];
+    };
+    $tenantModel->setConnection('tenant');
+    $instance = $tenantModel->newQuery()->create();
+
+    $instance->addReview([
+        'approved' => true,
+        'ratings' => ['overall' => 5, 'quality' => 3],
+    ]);
+
+    expect($instance->averageRating('overall'))->toEqual(5.0)
+        ->and($instance->overallAverageRating())->toEqual(4.0)
+        ->and($instance->averageRatings())->toMatchArray([
+            'overall' => 5.0,
+            'quality' => 3.0,
+        ])
+        ->and($instance->ratingCounts())->toMatchArray([
+            1 => 0,
+            2 => 0,
+            3 => 1,
+            4 => 0,
+            5 => 1,
+        ]);
 });

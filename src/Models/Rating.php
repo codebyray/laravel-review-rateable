@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Rating extends Model
 {
+    protected $casts = [
+        'value' => 'integer',
+    ];
+
     protected $fillable = [
         'review_id',
         'key',
