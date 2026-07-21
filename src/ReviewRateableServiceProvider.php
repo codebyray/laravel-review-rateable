@@ -33,12 +33,6 @@ class ReviewRateableServiceProvider extends ServiceProvider
                 ], 'config'
             );
         }
-
-        // Merge package configuration.
-        $this->mergeConfigFrom(
-            __DIR__.'/../config/review-rateable.php',
-            'review-rateable'
-        );
     }
 
     /**
@@ -46,9 +40,14 @@ class ReviewRateableServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/review-rateable.php',
+            'review-rateable'
+        );
+
+        $this->app->bind(
             ReviewRateableContract::class,
-            function ($app) {
+            function () {
                 return new ReviewRateableService();
             }
         );

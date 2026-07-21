@@ -1,0 +1,62 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.1'
+            laravel: '10.*'
+            testbench: '8.*'
+            pest: '1.*'
+          - php: '8.2'
+            laravel: '11.*'
+            testbench: '9.*'
+            pest: '3.*'
+          - php: '8.2'
+            laravel: '12.*'
+            testbench: '10.*'
+            pest: '3.*'
+          - php: '8.3'
+            laravel: '13.*'
+            testbench: '11.*'
+            pest: '4.*'
+
+    name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: >-
+          composer update
+          --with "illuminate/config:${{ matrix.laravel }}"
+          --with "illuminate/database:${{ matrix.laravel }}"
+          --with "illuminate/support:${{ matrix.laravel }}"
+          --with "orchestra/testbench:${{ matrix.testbench }}"
+          --with "pestphp/pest:${{ matrix.pest }}"
+          --prefer-dist
+          --no-interaction
+          --no-progress
+
+      - name: Run tests
+        run: composer test

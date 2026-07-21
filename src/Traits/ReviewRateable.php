@@ -4,6 +4,7 @@ namespace Codebyray\ReviewRateable\Traits;
 
 use Codebyray\ReviewRateable\Models\Rating;
 use Codebyray\ReviewRateable\Models\Review;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
@@ -30,52 +31,50 @@ trait ReviewRateable
      */
     public function addReview(array $data, ?int $userId = null): Review
     {
-        // Determine department, recommendation, and approval status.
-        $department = $data['department'] ?? 'default';
-        $recommend = $data['recommend'] ?? false;
-        $approved = $data['approved'] ?? config('review-rateable.approved_review', false);
+        return DB::connection($this->getConnectionName())->transaction(function () use ($data, $userId) {
+            // Determine department, recommendation, and approval status.
+            $department = $data['department'] ?? 'default';
+            $recommend = $data['recommend'] ?? false;
+            $approved = $data['approved'] ?? config('review-rateable.approved_review', false);
 
-        // Create the review record.
-        $review = $this->reviews()->create(
-            [
+            // Create the review record.
+            $review = $this->reviews()->create([
                 'user_id' => $userId,
                 'review' => $data['review'] ?? null,
                 'department' => $department,
                 'recommend' => $recommend,
                 'approved' => $approved,
-            ]
-        );
+            ]);
 
-        // Get allowed rating keys for the specified department.
-        $departments = config('review-rateable.departments', []);
-        $configRatings = $departments[$department]['ratings'] ?? [];
+            // Get allowed rating keys for the specified department.
+            $departments = config('review-rateable.departments', []);
+            $configRatings = $departments[$department]['ratings'] ?? [];
 
-        // Get global min and max rating values.
-        $min = config('review-rateable.min_rating_value', 1);
-        $max = config('review-rateable.max_rating_value', 10);
+            // Get global min and max rating values.
+            $min = config('review-rateable.min_rating_value', 1);
+            $max = config('review-rateable.max_rating_value', 10);
 
-        // Process each allowed rating key.
-        foreach ($configRatings as $key => $label) {
-            if (isset($data['ratings'][$key])) {
-                $value = $data['ratings'][$key];
+            // Process each allowed rating key.
+            foreach ($configRatings as $key => $label) {
+                if (isset($data['ratings'][$key])) {
+                    $value = $data['ratings'][$key];
 
-                // Enforce rating boundaries.
-                if ($value < $min) {
-                    $value = $min;
-                } elseif ($value > $max) {
-                    $value = $max;
-                }
+                    // Enforce rating boundaries.
+                    if ($value < $min) {
+                        $value = $min;
+                    } elseif ($value > $max) {
+                        $value = $max;
+                    }
 
-                $review->ratings()->create(
-                    [
+                    $review->ratings()->create([
                         'key' => $key,
                         'value' => $value,
-                    ]
-                );
+                    ]);
+                }
             }
-        }
 
-        return $review;
+            return $review;
+        });
     }
 
     /**
@@ -96,60 +95,76 @@ trait ReviewRateable
             return false;
         }
 
-        $review = $this->reviews()->find($reviewId);
+        return DB::connection($this->getConnectionName())->transaction(function () use ($reviewId, $data) {
+            $review = $this->reviews()->find($reviewId);
 
-        if (! $review) {
-            return false;
-        }
+            if (! $review) {
+                return false;
+            }
 
-        // Prepare attributes for the review update.
-        $attributes = [];
-        if (isset($data['review'])) {
-            $attributes['review'] = $data['review'];
-        }
-        if (isset($data['department'])) {
-            $attributes['department'] = $data['department'];
-        }
-        if (isset($data['recommend'])) {
-            $attributes['recommend'] = $data['recommend'];
-        }
-        if (isset($data['approved'])) {
-            $attributes['approved'] = $data['approved'];
-        }
-        if (! empty($attributes)) {
-            $review->update($attributes);
-        }
+            // Prepare attributes for the review update.
+            $attributes = [];
+            if (array_key_exists('review', $data)) {
+                $attributes['review'] = $data['review'];
+            }
+            if (isset($data['department'])) {
+                $attributes['department'] = $data['department'];
+            }
+            if (isset($data['recommend'])) {
+                $attributes['recommend'] = $data['recommend'];
+            }
+            if (isset($data['approved'])) {
+                $attributes['approved'] = $data['approved'];
+            }
 
-        // Update ratings if provided.
-        if (isset($data['ratings']) && is_array($data['ratings'])) {
-            // Determine which department's rating keys to use.
-            $department = $attributes['department'] ?? $review->department;
+            $departmentChanged = isset($attributes['department'])
+                && $attributes['department'] !== $review->department;
+
+            if (! empty($attributes)) {
+                $review->update($attributes);
+            }
+
             $departments = config('review-rateable.departments', []);
-            $configRatings = $departments[$department]['ratings'] ?? [];
+            $configRatings = $departments[$review->department]['ratings'] ?? [];
 
-            // Get global min and max rating values.
-            $min = config('review-rateable.min_rating_value', 1);
-            $max = config('review-rateable.max_rating_value', 10);
+            if ($departmentChanged) {
+                $allowedKeys = array_keys($configRatings);
 
-            foreach ($data['ratings'] as $key => $value) {
-                if ($value < $min) {
-                    $value = $min;
-                } elseif ($value > $max) {
-                    $value = $max;
-                }
-
-                $rating = $review->ratings()->where('key', $key)->first();
-                if ($rating) {
-                    $rating->update(['value' => $value]);
+                if ($allowedKeys === []) {
+                    $review->ratings()->delete();
                 } else {
-                    if (array_key_exists($key, $configRatings)) {
+                    $review->ratings()->whereNotIn('key', $allowedKeys)->delete();
+                }
+            }
+
+            // Update ratings if provided.
+            if (isset($data['ratings']) && is_array($data['ratings'])) {
+                // Get global min and max rating values.
+                $min = config('review-rateable.min_rating_value', 1);
+                $max = config('review-rateable.max_rating_value', 10);
+
+                foreach ($data['ratings'] as $key => $value) {
+                    if (! array_key_exists($key, $configRatings)) {
+                        continue;
+                    }
+
+                    if ($value < $min) {
+                        $value = $min;
+                    } elseif ($value > $max) {
+                        $value = $max;
+                    }
+
+                    $rating = $review->ratings()->where('key', $key)->first();
+                    if ($rating) {
+                        $rating->update(['value' => $value]);
+                    } else {
                         $review->ratings()->create(['key' => $key, 'value' => $value]);
                     }
                 }
             }
-        }
 
-        return true;
+            return true;
+        });
     }
 
     /**
@@ -176,7 +191,7 @@ trait ReviewRateable
      */
     public function averageRating(?string $key = null, bool $approved = true): ?float
     {
-        return Rating::where('key', $key)
+        return $this->newReviewRateableRatingQuery()->where('key', $key)
             ->whereIn(
                 'review_id',
                 $this->reviews()->where('approved', $approved)->select('id')
@@ -190,7 +205,7 @@ trait ReviewRateable
      */
     public function averageRatings(bool $approved = true): array
     {
-        return Rating::selectRaw('key, AVG(value) as average')
+        return $this->newReviewRateableRatingQuery()->selectRaw('key, AVG(value) as average')
             ->whereIn(
                 'review_id',
                 $this->reviews()->where('approved', $approved)->select('id')
@@ -209,7 +224,7 @@ trait ReviewRateable
         ?string $key = null,
         bool $approved = true
     ): ?float {
-        return Rating::where('key', $key)
+        return $this->newReviewRateableRatingQuery()->where('key', $key)
             ->whereIn(
                 'review_id',
                 $this->reviews()
@@ -227,7 +242,7 @@ trait ReviewRateable
      */
     public function averageRatingsByDepartment(string $department = 'default', bool $approved = true): array
     {
-        return Rating::selectRaw('key, AVG(value) as average')
+        return $this->newReviewRateableRatingQuery()->selectRaw('key, AVG(value) as average')
             ->whereIn(
                 'review_id',
                 $this->reviews()
@@ -299,7 +314,7 @@ trait ReviewRateable
      */
     public function overallAverageRating(bool $approved = true): ?float
     {
-        return Rating::whereIn(
+        return $this->newReviewRateableRatingQuery()->whereIn(
             'review_id',
             $this->reviews()->where('approved', $approved)->select('id')
         )->avg('value');
@@ -340,7 +355,8 @@ trait ReviewRateable
         $reviewTable = (new Review)->getTable();
         $ratingTable = (new Rating)->getTable();
 
-        $query = Rating::select("{$ratingTable}.value", DB::raw('COUNT(*) as total'))
+        $query = $this->newReviewRateableRatingQuery()
+            ->select("{$ratingTable}.value", DB::raw('COUNT(*) as total'))
             ->join($reviewTable, "{$ratingTable}.review_id", '=', "{$reviewTable}.id")
             ->where("{$reviewTable}.reviewable_type", $this->getMorphClass())
             ->where("{$reviewTable}.reviewable_id", $this->getKey())
@@ -378,7 +394,8 @@ trait ReviewRateable
         $ratingTable = (new Rating)->getTable();
 
         // base query: gives you value => count
-        $raw = Rating::select("{$ratingTable}.value", DB::raw('COUNT(*) as count'))
+        $raw = $this->newReviewRateableRatingQuery()
+            ->select("{$ratingTable}.value", DB::raw('COUNT(*) as count'))
             ->join($reviewTable, "{$ratingTable}.review_id", '=', "{$reviewTable}.id")
             ->where("{$reviewTable}.reviewable_type", $this->getMorphClass())
             ->where("{$reviewTable}.reviewable_id", $this->getKey())
@@ -422,7 +439,7 @@ trait ReviewRateable
         bool $withRatings = true
     ): Collection {
         $query = $this->reviews()
-            ->when($approved, fn ($q) => $q->where('approved', $approved))
+            ->where('approved', $approved)
             ->when($department, fn ($q) => $q->where('department', $department))
             ->whereHas(
                 'ratings', fn ($q) => $q->where('value', $starValue)
@@ -433,5 +450,16 @@ trait ReviewRateable
         }
 
         return $query->get();
+    }
+
+    /**
+     * Start a rating query on the reviewable model's database connection.
+     */
+    protected function newReviewRateableRatingQuery(): Builder
+    {
+        $rating = new Rating();
+        $rating->setConnection($this->getConnectionName());
+
+        return $rating->newQuery();
     }
 }
