@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -41,9 +41,9 @@ jobs:
       - name: Install dependencies
         run: >-
           composer update
-          "illuminate/config:${{ matrix.laravel }}"
-          "illuminate/database:${{ matrix.laravel }}"
-          "illuminate/support:${{ matrix.laravel }}"
+          --with "illuminate/config:${{ matrix.laravel }}"
+          --with "illuminate/database:${{ matrix.laravel }}"
+          --with "illuminate/support:${{ matrix.laravel }}"
           --prefer-dist
           --no-interaction
           --no-progress
