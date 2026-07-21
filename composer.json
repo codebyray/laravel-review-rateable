@@ -57,6 +57,6 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/pest tests"
+        "test": "vendor/bin/pest"
     }
 }
