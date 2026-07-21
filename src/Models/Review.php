@@ -10,6 +10,11 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Review extends Model
 {
+    protected $casts = [
+        'recommend' => 'boolean',
+        'approved' => 'boolean',
+    ];
+
     protected $fillable = [
         'reviewable_id',
         'reviewable_type',

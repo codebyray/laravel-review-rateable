@@ -2,6 +2,24 @@
 
 All notable changes to `laravel-review-rateable` will be documented here.
 
+## 2.1.4 - 2026-07-21
+
+### Fixed
+
+* Filter unapproved reviews correctly in `getReviewsByRating`.
+* Run rating aggregate queries on the reviewable model's database connection.
+* Roll back review and rating writes together when an operation fails.
+* Remove ratings that are invalid after changing a review's department.
+* Resolve independent service instances to prevent mutable model state from leaking between consumers.
+* Cast review flags and rating values consistently across database drivers.
+
+### Maintenance
+
+* Merge package configuration during service registration.
+* Add regression coverage for filtering, transactions, service bindings, casts, department changes, and non-default connections.
+* Correct configuration, publishing, and service contract examples in the README.
+* Replace the obsolete Travis configuration with a supported Laravel compatibility matrix.
+
 ## 2.1.3 - 2026-07-15
 
 ### What's Changed

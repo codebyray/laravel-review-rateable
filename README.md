@@ -1,5 +1,5 @@
 # Laravel Review Rateable
-<img alt="Packagist Downloads" src="https://img.shields.io/packagist/dt/codebyray/laravel-review-rateable"> <img alt="GitHub" src="https://img.shields.io/github/license/codebyray/laravel-review-rateable"> <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/codebyray/laravel-review-rateable"> <img alt="TravisCI" src="https://api.travis-ci.com/codebyray/laravel-review-rateable.svg?branch=master">
+<img alt="Packagist Downloads" src="https://img.shields.io/packagist/dt/codebyray/laravel-review-rateable"> <img alt="GitHub" src="https://img.shields.io/github/license/codebyray/laravel-review-rateable"> <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/codebyray/laravel-review-rateable"> [![Tests](https://github.com/codebyray/laravel-review-rateable/actions/workflows/tests.yml/badge.svg)](https://github.com/codebyray/laravel-review-rateable/actions/workflows/tests.yml)
 
 > **NOTE: Breaking Changes**
 > This is a complete rewrite from v1. It is not compatible with previous versions of this package. Because v2 is a total architectural overhaul, you cannot simply upgrade; you will need to perform a migration of your existing data and update your implementation to match the new service contract and trait logic.
@@ -47,7 +47,7 @@ php artisan migrate
 You can customize the package behavior by publishing the configuration file:
 
 ```bash
-php artisan vendor:publish --tag=review-rateable-config
+php artisan vendor:publish --provider="Codebyray\ReviewRateable\ReviewRateableServiceProvider" --tag=config
 ```
 
 ### User Model Configuration
@@ -65,7 +65,7 @@ You can customize the package behavior by modifying config/review-rateable.php:
     - min_rating_value: Minimum rating value.
     - max_rating_value: Maximum rating value.
 - Review Approval:
-    - review_approved: Default approval status for new reviews.
+    - approved_review: Default approval status for new reviews.
 - Departments & Rating Labels: Define multiple departments, each with its own set of rating keys and labels.
 
 Example configuration:
@@ -75,8 +75,8 @@ Example configuration:
 return [
     'user_model'       => \App\Models\User::class,
     'min_rating_value' => 1,
-    'max_rating_value' => 10,
-    'review_approved'  => false, // Reviews will be unapproved by default
+    'max_rating_value' => 5,
+    'approved_review'  => false, // Reviews will be unapproved by default
 
     'departments' => [
         'default' => [
@@ -85,7 +85,6 @@ return [
                 'customer_service' => 'Customer Service Rating',
                 'quality'          => 'Quality Rating',
                 'price'            => 'Price Rating',
-                'recommendation'   => 'Would Recommend?',
             ],
         ],
         'sales' => [
@@ -93,7 +92,6 @@ return [
                 'overall'        => 'Overall Rating',
                 'communication'  => 'Communication Rating',
                 'follow_up'      => 'Follow-Up Rating',
-                'recommendation' => 'Would Recommend?',
             ],
         ],
         'support' => [
@@ -101,7 +99,6 @@ return [
                 'overall'        => 'Overall Rating',
                 'speed'          => 'Response Speed',
                 'knowledge'      => 'Knowledge Rating',
-                'recommendation' => 'Would Recommend?',
             ],
         ],
     ],
@@ -124,10 +121,12 @@ class Product extends Model
 {
     use ReviewRateable;
 }
+```
 
 ### Adding a review/rating(s)
 You can add a review (with ratings) directly via the trait:
 
+```php
 $product = Product::find($productId);
 
 $product->addReview([
@@ -262,15 +261,15 @@ $totalReviews = $product->ratingStats();
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use CodeByRay\LaravelReviewRatable\Contracts\ReviewRatableContract;
+use Codebyray\ReviewRateable\Contracts\ReviewRateableContract;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProductReviewController extends Controller
 {
-    protected ReviewRatableContract $reviewService;
+    protected ReviewRateableContract $reviewService;
 
-    public function __construct(ReviewRatableContract $reviewService)
+    public function __construct(ReviewRateableContract $reviewService)
     {
         $this->reviewService = $reviewService;
     }
