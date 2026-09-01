@@ -51,6 +51,8 @@ jobs:
           composer update
           --with "illuminate/config:${{ matrix.laravel }}"
           --with "illuminate/database:${{ matrix.laravel }}"
+          --with "illuminate/filesystem:${{ matrix.laravel }}"
+          --with "illuminate/http:${{ matrix.laravel }}"
           --with "illuminate/support:${{ matrix.laravel }}"
           --with "orchestra/testbench:${{ matrix.testbench }}"
           --with "pestphp/pest:${{ matrix.pest }}"
