@@ -26,6 +26,16 @@ class ReviewRateableServiceProvider extends ServiceProvider
                 ], 'migrations'
             );
 
+            // Review images are opt-in and have their own publish tag so
+            // applications that do not need them never create the table.
+            $imageTimestamp = date('Y_m_d_His', time()+2);
+            $this->publishes(
+                [
+                    __DIR__ . '/../database/migrations/create_review_images_table.php.stub' =>
+                        database_path("migrations/{$imageTimestamp}_create_review_images_table.php"),
+                ], 'review-images-migrations'
+            );
+
             // Publish the config file.
             $this->publishes(
                 [

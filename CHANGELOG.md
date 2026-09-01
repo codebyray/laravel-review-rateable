@@ -2,6 +2,18 @@
 
 All notable changes to `laravel-review-rateable` will be documented here.
 
+## 2.2.0 - 2026-08-31
+
+### Added
+
+* Add opt-in, ordered image attachments for reviews through a separately published migration.
+* Add `images()`, `addImage()`, `addImages()`, `removeImage()`, and `reorderImages()` APIs.
+* Add configurable storage disk, directories, image count, file size, MIME allowlist, and cleanup policy.
+* Add original and thumbnail URL helpers, with original-image fallback when no thumbnail is supplied.
+* Add safe post-commit file cleanup when images or their reviews are deleted.
+* Add eager-loading, filesystem, validation, ordering, cleanup, and publishing test coverage.
+* Document an application-owned Amazon-style thumbnail gallery and modal example.
+
 ## 2.1.4 - 2026-07-21
 
 ### Fixed
