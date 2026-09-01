@@ -38,6 +38,32 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Optional Review Images
+    |--------------------------------------------------------------------------
+    |
+    | Review images are enabled by publishing and running the migration tagged
+    | "review-images-migrations". Files are stored beneath a directory named
+    | for the review ID. Thumbnail files may be supplied by the application;
+    | when omitted, thumbnail_url falls back to the original image URL.
+    |
+    */
+    'images' => [
+        'disk' => env('REVIEW_IMAGE_DISK', env('FILESYSTEM_DISK', 'public')),
+        'directory' => 'review-images',
+        'thumbnail_directory' => 'review-images/thumbnails',
+        'max_count' => 10,
+        'max_file_size' => 5120, // Kilobytes
+        'allowed_mime_types' => [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+        ],
+        'delete_files_on_delete' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Departments & Their Rating Labels
     |--------------------------------------------------------------------------
     |
