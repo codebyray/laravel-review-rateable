@@ -25,6 +25,10 @@ it('calculates grouped rating averages on MySQL', function () {
         'prefix' => '',
         'strict' => true,
     ]);
+    config()->set('review-rateable.departments.support.ratings', [
+        'overall' => 'Overall Rating',
+        'quality' => 'Quality Rating',
+    ]);
 
     DB::purge('review-rateable-mysql');
     $schema = Schema::connection('review-rateable-mysql');
