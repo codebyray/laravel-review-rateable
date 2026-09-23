@@ -72,7 +72,7 @@ class ReviewRateableService implements ReviewRateableContract
     }
 
     /**
-     * Delegate averageRating calculation to the model.
+     * Delegate the average calculation for one named criterion to the model.
      *
      * @throws Exception
      */
@@ -82,7 +82,7 @@ class ReviewRateableService implements ReviewRateableContract
     }
 
     /**
-     * Delegate averageRatings calculation to the model.
+     * Delegate the per-criterion average calculations to the model.
      *
      * @throws Exception
      */
@@ -159,7 +159,7 @@ class ReviewRateableService implements ReviewRateableContract
     }
 
     /**
-     * Get the overall average rating for all ratings attached to the model.
+     * Get one combined average across every stored rating criterion.
      *
      * @throws Exception
      */
@@ -179,8 +179,8 @@ class ReviewRateableService implements ReviewRateableContract
     }
 
     /**
-     * Return an array of rating value ⇒ count, for the full model
-     * or for a given department.
+     * Return an array of rating value => count across all stored criteria,
+     * for the full model or for a given department.
      *
      * @throws Exception
      */
@@ -193,7 +193,7 @@ class ReviewRateableService implements ReviewRateableContract
      * Return an array with:
      *  • counts:     [1 => x, 2 => y, …, 5 => z]
      *  • percentages: [1 => pct1, …, 5 => pct5]
-     *  • total:      total number of ratings
+     *  • total:      total number of stored criterion values (not reviews)
      *
      * @throws Exception
      */
@@ -203,7 +203,7 @@ class ReviewRateableService implements ReviewRateableContract
     }
 
     /**
-     * Return reviews based on star ratings.
+     * Return reviews containing the star value in any rating criterion.
      *
      * @throws Exception
      */

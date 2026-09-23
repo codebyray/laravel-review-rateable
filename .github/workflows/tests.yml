@@ -62,3 +62,46 @@ jobs:
 
       - name: Run tests
         run: composer test
+
+  mysql:
+    runs-on: ubuntu-latest
+    name: MySQL compatibility
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: review_rateable
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --host=127.0.0.1 --user=root"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          extensions: pdo_mysql
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run MySQL compatibility tests
+        env:
+          REVIEW_RATEABLE_MYSQL_TESTS: true
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: review_rateable
+          DB_USERNAME: root
+          DB_PASSWORD: ''
+        run: vendor/bin/pest tests/MySqlCompatibilityTest.php

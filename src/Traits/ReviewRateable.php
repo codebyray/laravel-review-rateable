@@ -187,7 +187,8 @@ trait ReviewRateable
     }
 
     /**
-     * Calculate the average rating for a given key, filtering reviews by approval.
+     * Calculate the average for one named rating criterion, such as "overall",
+     * filtering reviews by approval.
      */
     public function averageRating(?string $key = null, bool $approved = true): ?float
     {
@@ -199,13 +200,13 @@ trait ReviewRateable
     }
 
     /**
-     * Get overall average ratings for all keys, filtering reviews by approval.
+     * Get a separate average for every rating criterion, filtering reviews by approval.
      *
      * @return array Format: ['overall' => 4.5, 'quality' => 4.0, ...]
      */
     public function averageRatings(bool $approved = true): array
     {
-        return $this->newReviewRateableRatingQuery()->selectRaw('key, AVG(value) as average')
+        return $this->newReviewRateableRatingQuery()->select('key')->selectRaw('AVG(value) as average')
             ->whereIn(
                 'review_id',
                 $this->reviews()->where('approved', $approved)->select('id')
@@ -216,7 +217,7 @@ trait ReviewRateable
     }
 
     /**
-     * Calculate the average rating for a given key within a department,
+     * Calculate the average for one named rating criterion within a department,
      * filtering reviews by approval.
      */
     public function averageRatingByDepartment(
@@ -235,14 +236,14 @@ trait ReviewRateable
     }
 
     /**
-     * Get overall average ratings for all keys within a department,
+     * Get a separate average for every rating criterion within a department,
      * filtering reviews by approval.
      *
      * @return array Format: ['overall' => 4.5, 'quality' => 4.0, ...]
      */
     public function averageRatingsByDepartment(string $department = 'default', bool $approved = true): array
     {
-        return $this->newReviewRateableRatingQuery()->selectRaw('key, AVG(value) as average')
+        return $this->newReviewRateableRatingQuery()->select('key')->selectRaw('AVG(value) as average')
             ->whereIn(
                 'review_id',
                 $this->reviews()
@@ -309,8 +310,10 @@ trait ReviewRateable
     }
 
     /**
-     * Calculate the overall average rating for all ratings across all reviews,
-     * optionally filtering by the approved status.
+     * Calculate one combined average across every stored rating criterion.
+     *
+     * Use averageRating('overall') when "overall" is the name of the primary
+     * criterion that should be presented as the reviewable model's headline score.
      */
     public function overallAverageRating(bool $approved = true): ?float
     {
@@ -341,8 +344,8 @@ trait ReviewRateable
     }
 
     /**
-     * Return an array of rating value ⇒ count, for the full model
-     * or for a given department.
+     * Return an array of rating value => count across all stored criteria,
+     * for the full model or for a given department.
      *
      * @param  string|null  $department  If null, counts across all departments.
      * @param  bool  $approved  Only count approved reviews?
@@ -384,7 +387,7 @@ trait ReviewRateable
      * Return an array with:
      *  • counts: [1 => x, 2 => y, …, 5 => z]
      *  • percentages: [1 => pct1, …, 5 => pct5]
-     *  • total: total number of ratings
+     *  • total: total number of stored criterion values (not reviews)
      */
     public function ratingStats(?string $department = 'default', bool $approved = true): array
     {
@@ -430,7 +433,7 @@ trait ReviewRateable
     }
 
     /**
-     * Return reviews based on star ratings.
+     * Return reviews containing the star value in any rating criterion.
      */
     public function getReviewsByRating(
         ?int $starValue = null,
