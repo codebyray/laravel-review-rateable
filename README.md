@@ -399,7 +399,8 @@ $product->getReviewsByDepartment("sales", false);
 ```php
 $product = Product::findOrFail($productId);
 
-// Get all 5-star reviews/ratings for the "support" department.
+// Get reviews in the "support" department that contain a 5-star value
+// in any rating criterion.
 $product->getReviewsByRating(5, department: "support");
 ```
 ### Get the total number of reviews
@@ -416,15 +417,22 @@ $product->totalDepartmentReviews(department: "sales");
 ```php
 $product = Product::findOrFail($productId);
 
-// Get average rating for a specific key
+// Get the average for the primary "overall" criterion. Use this for the
+// customer-facing headline score when "overall" is one of your configured keys.
 $overallAverage = $product->averageRating('overall');
 
-// Get all average ratings for all keys
+// Get a separate average for every configured criterion.
+// Example: ['overall' => 4.8, 'quality' => 4.6, 'value' => 4.2]
 $allAverages = $product->averageRatings();
 
-// Get overall average across all ratings
-$overallRating = $product->overallAverageRating();
+// Get one combined average across every stored criterion value. This is an
+// analytics metric, not specifically the criterion named "overall".
+$combinedCriterionAverage = $product->overallAverageRating();
 ```
+
+`overallAverageRating()` retains its existing name for backward compatibility.
+For most review interfaces, `averageRating('overall')` is the less ambiguous
+choice because it averages only the configured `overall` criterion.
 ### Count the total number of reviews
 ```php
 $product = Product::find($productId);
@@ -436,14 +444,17 @@ $totalDepartmentReviews = $product->totalDepartmentReviews();
 ```php
 $product = Product::find($productId);
 
-// Returns array where key is star rating and value is count
-$totalReviews = $product->ratingCounts();
+// Returns an array where each key is a star value and each value is the number
+// of stored criterion values with that score. With multiple criteria, these
+// counts are not review counts.
+$ratingCounts = $product->ratingCounts();
 ```
 ### Return ratings stats (counts, percentages, total)
 ```php
 $product = Product::find($productId);
 
-$totalReviews = $product->ratingStats();
+// The returned total is the number of stored criterion values, not reviews.
+$ratingStats = $product->ratingStats();
 ```
 ## Example Usage in a Controller
 ```php

@@ -2,6 +2,19 @@
 
 All notable changes to `laravel-review-rateable` will be documented here.
 
+## 2.2.1 - 2026-09-22
+
+### Fixed
+
+* Quote the `key` column correctly in grouped rating aggregates for MySQL compatibility.
+* Reuse existing migration filenames when package migrations are published more than once.
+
+### Maintenance
+
+* Clarify the distinction between primary-criterion, per-criterion, and combined-criterion averages.
+* Document that rating distributions and rating-based review filtering operate across all stored criteria.
+* Add MySQL regression coverage for grouped rating averages.
+
 ## 2.2.0 - 2026-08-31
 
 ### Added

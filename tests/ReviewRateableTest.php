@@ -427,8 +427,11 @@ it('calculates average ratings correctly using database queries', function () us
 
     // Test grouped averages
     $averages = $instance->averageRatings();
+    $departmentAverages = $instance->averageRatingsByDepartment('default');
     expect($averages)->toHaveKey('overall', 4.0)
         ->and($averages)->toHaveKey('quality', 3.0)
+        ->and($departmentAverages)->toHaveKey('overall', 4.0)
+        ->and($departmentAverages)->toHaveKey('quality', 3.0)
         ->and($instance->averageRatingByDepartment('default', 'overall'))->toEqual(4.0);
 });
 

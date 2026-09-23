@@ -41,7 +41,7 @@ interface ReviewRateableContract
     public function approveReview(?int $reviewId = null): bool;
 
     /**
-     * Get the average rating for a given key.
+     * Get the average for one named rating criterion, such as "overall".
      *
      * @param  string|null $key
      * @param  bool        $approved
@@ -50,7 +50,7 @@ interface ReviewRateableContract
     public function averageRating(?string $key = null, bool $approved = true): ?float;
 
     /**
-     * Get overall average ratings for all keys.
+     * Get a separate average for every rating criterion.
      *
      * @param  bool $approved
      * @return array
@@ -58,7 +58,7 @@ interface ReviewRateableContract
     public function averageRatings(bool $approved = true): array;
 
     /**
-     * Get the average rating for a given key within a department.
+     * Get the average for one named rating criterion within a department.
      *
      * @param  string      $department
      * @param  string|null $key
@@ -72,7 +72,7 @@ interface ReviewRateableContract
     ): ?float;
 
     /**
-     * Get overall average ratings for all keys within a department.
+     * Get a separate average for every rating criterion within a department.
      *
      * @param  string $department
      * @param  bool   $approved
@@ -122,7 +122,9 @@ interface ReviewRateableContract
     public function totalDepartmentReviews(string $department = "default", bool $approved = true): int;
 
     /**
-     * Get the overall average rating for all ratings attached to the model.
+     * Get one combined average across every stored rating criterion.
+     *
+     * Use averageRating('overall') for a primary criterion named "overall".
      *
      * @param  bool $approved
      * @return float|null
@@ -138,8 +140,8 @@ interface ReviewRateableContract
     public function deleteReview(?int $reviewId = null): bool;
 
     /**
-     * Return an array of rating value ⇒ count, for the full model
-     * or for a given department.
+     * Return an array of rating value => count across all stored criteria,
+     * for the full model or for a given department.
      *
      * @param  string|null $department
      * @param  bool        $approved
@@ -151,7 +153,7 @@ interface ReviewRateableContract
      * Return an array with:
      *  • counts:     [1 => x, 2 => y, …, 5 => z]
      *  • percentages: [1 => pct1, …, 5 => pct5]
-     *  • total:      total number of ratings
+     *  • total:      total number of stored criterion values (not reviews)
      *
      * @param  string|null $department
      * @param  bool        $approved
@@ -160,7 +162,7 @@ interface ReviewRateableContract
     public function ratingStats(?string $department = "default", bool $approved = true): array;
 
     /**
-     * Return reviews based on star ratings.
+     * Return reviews containing the star value in any rating criterion.
      *
      * @param  int|null    $starValue
      * @param  string      $department
