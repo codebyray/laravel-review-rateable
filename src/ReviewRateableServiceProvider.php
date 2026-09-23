@@ -15,24 +15,21 @@ class ReviewRateableServiceProvider extends ServiceProvider
     {
         // Publish migration stubs.
         if ($this->app->runningInConsole()) {
-            $timestamp = date('Y_m_d_His', time());
-            $timestampTwo = date('Y_m_d_His', time()+1);
             $this->publishes(
                 [
                     __DIR__ . '/../database/migrations/create_reviews_table.php.stub' =>
-                        database_path("migrations/{$timestamp}_create_reviews_table.php"),
+                        $this->migrationPath('create_reviews_table'),
                     __DIR__ . '/../database/migrations/create_ratings_table.php.stub' =>
-                        database_path("migrations/{$timestampTwo}_create_ratings_table.php"),
+                        $this->migrationPath('create_ratings_table', 1),
                 ], 'migrations'
             );
 
             // Review images are opt-in and have their own publish tag so
             // applications that do not need them never create the table.
-            $imageTimestamp = date('Y_m_d_His', time()+2);
             $this->publishes(
                 [
                     __DIR__ . '/../database/migrations/create_review_images_table.php.stub' =>
-                        database_path("migrations/{$imageTimestamp}_create_review_images_table.php"),
+                        $this->migrationPath('create_review_images_table', 2),
                 ], 'review-images-migrations'
             );
 
@@ -43,6 +40,25 @@ class ReviewRateableServiceProvider extends ServiceProvider
                 ], 'config'
             );
         }
+    }
+
+    /**
+     * Reuse an already published migration filename instead of creating a
+     * second timestamped copy when vendor:publish is run again.
+     */
+    protected function migrationPath(string $migrationName, int $timestampOffset = 0): string
+    {
+        $existingPaths = glob(database_path("migrations/*_{$migrationName}.php"));
+
+        if (is_array($existingPaths) && $existingPaths !== []) {
+            sort($existingPaths);
+
+            return $existingPaths[0];
+        }
+
+        $timestamp = date('Y_m_d_His', time() + $timestampOffset);
+
+        return database_path("migrations/{$timestamp}_{$migrationName}.php");
     }
 
     /**
