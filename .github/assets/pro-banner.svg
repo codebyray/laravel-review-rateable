@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="280" viewBox="0 0 1200 280" role="img" aria-labelledby="title description">
+  <title id="title">ReviewRateable Pro</title>
+  <desc id="description">A commercial companion to the open-source Core, with ready-made Livewire, React, and Vue review interfaces.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#123f5f"/>
+    </linearGradient>
+    <linearGradient id="button" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0284c7"/>
+      <stop offset="1" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="1" y="1" width="1198" height="278" rx="24" fill="url(#background)" stroke="#2c5a76" stroke-width="2"/>
+  <circle cx="1100" cy="-60" r="255" fill="#38bdf8" opacity=".07"/>
+  <circle cx="1010" cy="260" r="164" fill="#38bdf8" opacity=".06"/>
+
+  <g transform="translate(52 65)">
+    <rect width="88" height="88" rx="23" fill="#0369a1"/>
+    <path d="M22 20h44v37H42L26 71V57h-4z" fill="#fff"/>
+    <path d="m44 27 3.6 7.3 8.1 1.2-5.9 5.7 1.4 8.1-7.2-3.8-7.2 3.8 1.4-8.1-5.9-5.7 8.1-1.2z" fill="#0369a1"/>
+  </g>
+
+  <text x="166" y="91" fill="#7dd3fc" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="3">OPTIONAL COMMERCIAL COMPANION</text>
+  <text x="166" y="148" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700">ReviewRateable Pro</text>
+  <text x="166" y="190" fill="#cbd5e1" font-family="Arial, Helvetica, sans-serif" font-size="24">Ready-made review interfaces for Livewire, React &amp; Vue.</text>
+
+  <rect x="166" y="215" width="196" height="36" rx="18" fill="#e0f2fe" opacity=".12"/>
+  <text x="264" y="239" fill="#bae6fd" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">BUILT ON CORE</text>
+
+  <rect x="951" y="105" width="199" height="58" rx="12" fill="url(#button)"/>
+  <text x="1050" y="142" fill="#fff" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">Explore Pro →</text>
+</svg>

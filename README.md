@@ -17,6 +17,12 @@ The package supports multiple departments, configurable rating boundaries, revie
 - **Flexible Data Retrieval:** Retrieve reviews with or without ratings, filter by approval status, and calculate averages.
 - **Service Contract:** Use a dedicated service that implements a contract for a decoupled, testable API.
 
+## Optional Pro companion
+
+[![ReviewRateable Pro — ready-made review interfaces for Livewire, React, and Vue](.github/assets/pro-banner.svg)](https://reviewrateable.com/pro)
+
+Core is MIT-licensed and works independently. [ReviewRateable Pro](https://reviewrateable.com/pro) is an optional commercial companion that builds on the same review data and adds publishable interfaces and moderation workflows.
+
 ## Requirements
 
 - PHP 8.1 or higher
