@@ -2,6 +2,7 @@
 
 namespace Codebyray\ReviewRateable\Tests;
 
+use Codebyray\ReviewRateable\Contracts\CriterionRatingContract;
 use Codebyray\ReviewRateable\Contracts\ReviewRateableContract;
 use Codebyray\ReviewRateable\Models\Review;
 use Codebyray\ReviewRateable\Services\ReviewRateableService;
@@ -487,13 +488,58 @@ it('filters unapproved reviews by rating', function () use ($dummyModel) {
         ->and($reviews->first()->is($unapproved))->toBeTrue();
 });
 
+it('scopes key-specific rating statistics and review filters without changing legacy queries', function () use ($dummyModel) {
+    $instance = $dummyModel::create(['name' => 'Criterion Queries']);
+    $overallFive = $instance->addReview([
+        'approved' => true,
+        'ratings' => ['overall' => 5, 'quality' => 2],
+    ]);
+    $qualityFive = $instance->addReview([
+        'approved' => true,
+        'ratings' => ['overall' => 2, 'quality' => 5],
+    ]);
+    $pending = $instance->addReview([
+        'approved' => false,
+        'ratings' => ['overall' => 5, 'quality' => 5],
+    ]);
+    $sales = $instance->addReview([
+        'department' => 'sales',
+        'approved' => true,
+        'ratings' => ['overall' => 5, 'communication' => 4],
+    ]);
+    $other = $dummyModel::create(['name' => 'Other Target']);
+    $other->addReview(['approved' => true, 'ratings' => ['overall' => 5]]);
+
+    $service = app(CriterionRatingContract::class)->setModel($instance);
+    $counts = [1 => 0, 2 => 1, 3 => 0, 4 => 0, 5 => 1];
+
+    expect($service->ratingCountsForKey('overall'))->toEqual($counts)
+        ->and($service->ratingStatsForKey('overall'))->toEqual([
+            'counts' => $counts,
+            'percentages' => [1 => 0, 2 => 50, 3 => 0, 4 => 0, 5 => 50],
+            'total' => 2,
+        ])
+        ->and($instance->ratingCountsForKey('missing'))->toEqual([1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0])
+        ->and($instance->ratingStatsForKey('overall', null))->toHaveKey('total', 3)
+        ->and($instance->ratingStatsForKey('overall', 'default', false))->toHaveKey('total', 1)
+        ->and($instance->getReviewsByRatingForKey(5, 'overall')->modelKeys())->toEqual([$overallFive->id])
+        ->and($service->getReviewsByRatingForKey(5, 'quality')->modelKeys())->toEqual([$qualityFive->id])
+        ->and($instance->getReviewsByRatingForKey(5, 'overall', 'default', false)->modelKeys())->toEqual([$pending->id])
+        ->and($instance->getReviewsByRatingForKey(5, 'overall', '', true)->modelKeys())->toEqual([$overallFive->id, $sales->id])
+        ->and($instance->getReviewsByRating(5)->modelKeys())->toEqual([$overallFive->id, $qualityFive->id])
+        ->and($instance->ratingStats('default'))->toHaveKey('total', 4);
+});
+
 it('resolves independent review rateable service instances', function () {
     $first = app(ReviewRateableContract::class);
     $second = app(ReviewRateableContract::class);
+    $criterion = app(CriterionRatingContract::class);
 
     expect($first)->toBeInstanceOf(ReviewRateableService::class)
         ->and($second)->toBeInstanceOf(ReviewRateableService::class)
-        ->and($first)->not->toBe($second);
+        ->and($criterion)->toBeInstanceOf(ReviewRateableService::class)
+        ->and($first)->not->toBe($second)
+        ->and($first)->not->toBe($criterion);
 });
 
 it('casts review booleans and rating values consistently', function () use ($dummyModel) {

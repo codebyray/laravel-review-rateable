@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-review-rateable` will be documented here.
 
+## 2.3.0 - 2026-10-03
+
+### Added
+
+* Add criterion-specific rating counts, statistics, and review filtering through the trait and a new injectable `CriterionRatingContract`, while preserving the existing service contract and all-criteria query behavior.
+
 ## 2.2.1 - 2026-09-22
 
 ### Fixed
