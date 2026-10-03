@@ -78,6 +78,16 @@ $review = $product->addReview([
 $publishedReviews = $product->getReviews(); // Approved reviews with ratings.
 ```
 
+To build a distribution or filter for one criterion, use the key-aware query helpers:
+
+```php
+$overallCounts = $product->ratingCountsForKey('overall', 'default');
+$overallStats = $product->ratingStatsForKey('overall', 'default');
+$fiveStarOverallReviews = $product->getReviewsByRatingForKey(5, 'overall', 'default');
+```
+
+The same helpers are available from the injectable `CriterionRatingContract` after calling `setModel($product)`. This extended contract preserves compatibility with existing `ReviewRateableContract` implementations. The counts and statistics include approved reviews by default; pass `approved: false` for private pending-review queries. Pass `null` as the department to count a key across all departments. The existing `ratingCounts()`, `ratingStats()`, and `getReviewsByRating()` methods keep their all-criteria behavior.
+
 In an HTTP endpoint, authenticate the author, authorize the product, and validate the text and configured rating keys before calling `addReview()`. New reviews are unapproved by default. See the [review API guide](https://reviewrateable.com/docs/core/review) for a controller example, updates, approval, deletion, and the injectable service.
 
 ## Full documentation

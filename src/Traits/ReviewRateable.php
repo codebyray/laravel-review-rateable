@@ -353,6 +353,19 @@ trait ReviewRateable
      */
     public function ratingCounts(?string $department = 'default', bool $approved = true): array
     {
+        return $this->ratingCountsForKeyQuery(null, $department, $approved);
+    }
+
+    /**
+     * Count stored values for one rating key, optionally across all departments.
+     */
+    public function ratingCountsForKey(string $key, ?string $department = 'default', bool $approved = true): array
+    {
+        return $this->ratingCountsForKeyQuery($key, $department, $approved);
+    }
+
+    protected function ratingCountsForKeyQuery(?string $key, ?string $department, bool $approved): array
+    {
         $min = config('review-rateable.min_rating_value', 1);
         $max = config('review-rateable.max_rating_value', 5);
         $reviewTable = (new Review)->getTable();
@@ -367,6 +380,10 @@ trait ReviewRateable
 
         if ($department) {
             $query->where("{$reviewTable}.department", $department);
+        }
+
+        if ($key !== null) {
+            $query->where("{$ratingTable}.key", $key);
         }
 
         $raw = $query
@@ -391,33 +408,21 @@ trait ReviewRateable
      */
     public function ratingStats(?string $department = 'default', bool $approved = true): array
     {
-        $min = config('review-rateable.min_rating_value', 1);
-        $max = config('review-rateable.max_rating_value', 5);
-        $reviewTable = (new Review)->getTable();
-        $ratingTable = (new Rating)->getTable();
+        return $this->ratingStatistics($this->ratingCounts($department, $approved));
+    }
 
-        // base query: gives you value => count
-        $raw = $this->newReviewRateableRatingQuery()
-            ->select("{$ratingTable}.value", DB::raw('COUNT(*) as count'))
-            ->join($reviewTable, "{$ratingTable}.review_id", '=', "{$reviewTable}.id")
-            ->where("{$reviewTable}.reviewable_type", $this->getMorphClass())
-            ->where("{$reviewTable}.reviewable_id", $this->getKey())
-            ->where("{$reviewTable}.approved", $approved)
-            ->when($department, fn ($q) => $q->where("{$reviewTable}.department", $department))
-            ->groupBy("{$ratingTable}.value")
-            ->pluck('count', 'value')
-            ->all();
+    /**
+     * Return counts, percentages, and total for one rating key.
+     */
+    public function ratingStatsForKey(string $key, ?string $department = 'default', bool $approved = true): array
+    {
+        return $this->ratingStatistics($this->ratingCountsForKey($key, $department, $approved));
+    }
 
-        // zero-fill missing star values
-        $counts = [];
-        for ($i = $min; $i <= $max; $i++) {
-            $counts[$i] = $raw[$i] ?? 0;
-        }
-
-        // total number of ratings
+    protected function ratingStatistics(array $counts): array
+    {
         $total = array_sum($counts);
 
-        // percentages (integer 0–100)
         $percentages = [];
         foreach ($counts as $star => $count) {
             $percentages[$star] = $total
@@ -441,11 +446,35 @@ trait ReviewRateable
         bool $approved = true,
         bool $withRatings = true
     ): Collection {
+        return $this->reviewsMatchingRating($starValue, null, $department, $approved, $withRatings);
+    }
+
+    /**
+     * Return reviews with the requested value for a specific rating key.
+     */
+    public function getReviewsByRatingForKey(
+        ?int $starValue,
+        string $key,
+        string $department = 'default',
+        bool $approved = true,
+        bool $withRatings = true
+    ): Collection {
+        return $this->reviewsMatchingRating($starValue, $key, $department, $approved, $withRatings);
+    }
+
+    protected function reviewsMatchingRating(
+        ?int $starValue,
+        ?string $key,
+        string $department,
+        bool $approved,
+        bool $withRatings
+    ): Collection {
         $query = $this->reviews()
             ->where('approved', $approved)
             ->when($department, fn ($q) => $q->where('department', $department))
             ->whereHas(
                 'ratings', fn ($q) => $q->where('value', $starValue)
+                    ->when($key !== null, fn ($q) => $q->where('key', $key))
             );
 
         if ($withRatings) {

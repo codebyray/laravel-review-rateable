@@ -2,11 +2,11 @@
 
 namespace Codebyray\ReviewRateable\Services;
 
-use Codebyray\ReviewRateable\Contracts\ReviewRateableContract;
+use Codebyray\ReviewRateable\Contracts\CriterionRatingContract;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
-class ReviewRateableService implements ReviewRateableContract
+class ReviewRateableService implements CriterionRatingContract
 {
     /**
      * The reviewable model instance.
@@ -40,7 +40,7 @@ class ReviewRateableService implements ReviewRateableContract
     /**
      * Delegate adding a review to the model.
      *
-     * @return ReviewRateableContract
+     * @return mixed
      *
      * @throws Exception
      */
@@ -189,6 +189,11 @@ class ReviewRateableService implements ReviewRateableContract
         return $this->getModel()->ratingCounts($department, $approved);
     }
 
+    public function ratingCountsForKey(string $key, ?string $department = 'default', bool $approved = true): array
+    {
+        return $this->getModel()->ratingCountsForKey($key, $department, $approved);
+    }
+
     /**
      * Return an array with:
      *  • counts:     [1 => x, 2 => y, …, 5 => z]
@@ -200,6 +205,11 @@ class ReviewRateableService implements ReviewRateableContract
     public function ratingStats(?string $department = 'default', bool $approved = true): array
     {
         return $this->getModel()->ratingStats($department, $approved);
+    }
+
+    public function ratingStatsForKey(string $key, ?string $department = 'default', bool $approved = true): array
+    {
+        return $this->getModel()->ratingStatsForKey($key, $department, $approved);
     }
 
     /**
@@ -214,5 +224,15 @@ class ReviewRateableService implements ReviewRateableContract
         bool $withRatings = true
     ): Collection {
         return $this->getModel()->getReviewsByRating($starValue, $department, $approved, $withRatings);
+    }
+
+    public function getReviewsByRatingForKey(
+        ?int $starValue,
+        string $key,
+        string $department = 'default',
+        bool $approved = true,
+        bool $withRatings = true
+    ): Collection {
+        return $this->getModel()->getReviewsByRatingForKey($starValue, $key, $department, $approved, $withRatings);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Codebyray\ReviewRateable;
 
+use Codebyray\ReviewRateable\Contracts\CriterionRatingContract;
 use Codebyray\ReviewRateable\Contracts\ReviewRateableContract;
 use Codebyray\ReviewRateable\Services\ReviewRateableService;
 use Illuminate\Support\ServiceProvider;
@@ -77,5 +78,7 @@ class ReviewRateableServiceProvider extends ServiceProvider
                 return new ReviewRateableService();
             }
         );
+
+        $this->app->bind(CriterionRatingContract::class, ReviewRateableService::class);
     }
 }
