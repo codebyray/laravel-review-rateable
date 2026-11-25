@@ -20,33 +20,40 @@ jobs:
             laravel: '10.*'
             testbench: '8.*'
             pest: '1.*'
+            security_flags: '--no-security-blocking'
           - php: '8.2'
             laravel: '11.*'
             testbench: '9.*'
             pest: '3.*'
+            security_flags: '--no-security-blocking'
           - php: '8.2'
             laravel: '12.*'
             testbench: '10.*'
             pest: '3.*'
+            security_flags: ''
           - php: '8.3'
             laravel: '13.*'
             testbench: '11.*'
             pest: '4.*'
+            security_flags: ''
 
-    name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}
+    name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}${{ matrix.security_flags != '' && ' / legacy (EOL)' || '' }}
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           coverage: none
+          extensions: gd, pdo_sqlite
           tools: composer:v2
 
       - name: Install dependencies
+        # Historical Laravel 10/11 lanes check compatibility only. Their EOL
+        # upstream dependencies cannot satisfy maintained security audits.
         run: >-
           composer update
           --with "illuminate/config:${{ matrix.laravel }}"
@@ -56,9 +63,17 @@ jobs:
           --with "illuminate/support:${{ matrix.laravel }}"
           --with "orchestra/testbench:${{ matrix.testbench }}"
           --with "pestphp/pest:${{ matrix.pest }}"
+          ${{ matrix.security_flags }}
           --prefer-dist
           --no-interaction
           --no-progress
+
+      - name: Validate package
+        run: composer validate --strict
+
+      - name: Audit maintained dependencies
+        if: matrix.security_flags == ''
+        run: composer audit
 
       - name: Run tests
         run: composer test
@@ -83,14 +98,14 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           coverage: none
-          extensions: pdo_mysql
+          extensions: gd, pdo_mysql
           tools: composer:v2
 
       - name: Install dependencies

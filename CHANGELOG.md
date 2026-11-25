@@ -2,6 +2,19 @@
 
 All notable changes to `laravel-review-rateable` will be documented here.
 
+## 2.3.1 - 2026-11-24
+
+### Fixed
+
+* Delete every attached original and thumbnail after a review deletion commits, including when the loaded `images` relation is stale, filtered, or missing file columns.
+* Preserve optional-table handling, disabled cleanup, and rollback-safe file deletion.
+
+### Maintenance
+
+* Expand image cleanup regression tests, refresh development dependency resolution, and remove obsolete Testbench 6/7 constraints.
+* Add explicit security audits for maintained Laravel CI lanes and clarify historical compatibility coverage.
+* Update installation and maintenance upgrade guidance, and move the optional Pro companion information to the bottom of the README without the promotional banner.
+
 ## 2.3.0 - 2026-10-03
 
 ### Added

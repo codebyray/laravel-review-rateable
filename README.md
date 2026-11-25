@@ -16,31 +16,27 @@ Laravel Review Rateable is an MIT-licensed package for attaching written reviews
 - Optional, ordered review images with application-supplied thumbnails
 - Averages, distributions, counts, and a decoupled service contract
 
-## ReviewRateable Pro
-
-[![ReviewRateable Pro — ready-made review interfaces for Livewire, React, and Vue](.github/assets/pro-banner.svg)](https://reviewrateable.com/pro)
-
-**Core is complete, MIT licensed, and works independently.** [ReviewRateable Pro](https://reviewrateable.com/pro) is an optional commercial companion built on the same review data. It adds ready-made Livewire, React, and Vue interfaces plus moderation, replies, invitations, verified reviews, helpful voting, and other application workflows.
-
 ## Requirements
 
 - PHP 8.1 or higher, subject to your Laravel version's PHP requirements
 - Laravel 10, 11, 12, or 13
 - Compatible numeric IDs for reviewable models and users; the current Core schema does not support UUID identity
 
+Use an upstream-supported PHP version and the latest security patches for Laravel 12 or 13 for new deployments. Laravel 10/11 and PHP 8.1 remain historical compatibility targets; passing their tests does not provide upstream security support. See [maintenance upgrades](UPGRADING.md).
+
 ## Installation
 
 In your Laravel application:
 
 ```bash
-composer require codebyray/laravel-review-rateable:^2.2
+composer require codebyray/laravel-review-rateable:^2.3
 
 php artisan vendor:publish --provider="Codebyray\ReviewRateable\ReviewRateableServiceProvider" --tag=config
 php artisan vendor:publish --provider="Codebyray\ReviewRateable\ReviewRateableServiceProvider" --tag=migrations
 php artisan migrate
 ```
 
-Laravel discovers the service provider automatically. Publish each migration once; publishing again can create duplicate timestamped migrations. Review images use a [separate opt-in migration](https://reviewrateable.com/docs/core/photos), so the basic installation creates only reviews and ratings tables.
+Laravel discovers the service provider automatically. Publishing reuses an existing migration filename and leaves it unchanged unless you explicitly pass `--force`. Review images use a [separate opt-in migration](https://reviewrateable.com/docs/core/photos), so the basic installation creates only reviews and ratings tables.
 
 For upgrades, configuration, and production considerations, see the [full installation guide](https://reviewrateable.com/docs/core/installation).
 
@@ -97,9 +93,18 @@ The [Core documentation](https://reviewrateable.com/docs/core) is the maintained
 ## Testing
 
 ```bash
+composer install
 composer test
+composer validate --strict
+composer audit
 ```
+
+CI tests Laravel 10–13 and runs a separate MySQL regression job. Security audits gate the maintained Laravel 12/13 lanes; historical Laravel 10/11 lanes allow resolving dependencies with known upstream advisories solely to check compatibility.
 
 ## License and contributions
 
 Core is [MIT licensed](LICENSE). Bug reports, questions, and contributions are welcome through [GitHub issues](https://github.com/codebyray/laravel-review-rateable/issues).
+
+## Optional companion
+
+[ReviewRateable Pro](https://reviewrateable.com/pro) adds ready-made Livewire, React, and Vue interfaces and application workflows such as moderation, replies, and invitations. It is an optional commercial package; Core works independently and includes the review, rating, statistics, and image APIs under the MIT license.
