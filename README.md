@@ -107,4 +107,11 @@ Core is [MIT licensed](LICENSE). Bug reports, questions, and contributions are w
 
 ## Optional companion
 
+[![Black Friday and Cyber Monday 2026: save 50% on new ReviewRateable Pro licenses with CYBERWEEK2026](.github/assets/cyberweek-2026.svg)](https://reviewrateable.com/pricing)
+
 [ReviewRateable Pro](https://reviewrateable.com/pro) adds ready-made Livewire, React, and Vue interfaces and application workflows such as moderation, replies, and invitations. It is an optional commercial package; Core works independently and includes the review, rating, statistics, and image APIs under the MIT license.
+
+> **Black Friday + Cyber Monday 2026 — 50% off your first Pro purchase.**
+> Use **`CYBERWEEK2026`** at checkout from **Thanksgiving, November 26 at 6:00 p.m. through November 30 at 11:59 p.m. Pacific (PST)**.
+> Pro Developer: **$49.50 USD** (regularly $99). Pro Agency: **$149.50 USD** (regularly $299).
+> New Pro licenses only, including the first 12 months of updates. Renewals are not discounted; your license remains perpetual. [View the offer and plans](https://reviewrateable.com/pricing).
