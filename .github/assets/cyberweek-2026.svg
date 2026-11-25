@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="330" viewBox="0 0 1200 330" role="img" aria-labelledby="title description">
+  <title id="title">ReviewRateable Pro — Cyber Week 2026</title>
+  <desc id="description">Save 50% on a new Pro license with code CYBERWEEK2026, from November 26, 2026 at 6 p.m. through November 30 at 11:59 p.m. Pacific. Developer is $49.50 USD and Agency is $149.50 USD. Includes the first 12 months of updates. Regular renewal prices apply.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#0c4a60"/>
+    </linearGradient>
+    <clipPath id="panel"><rect width="1200" height="330" rx="22"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#panel)">
+    <rect x="1" y="1" width="1198" height="328" rx="22" fill="url(#background)" stroke="#2c5a76" stroke-width="2"/>
+    <circle cx="1120" cy="-75" r="285" fill="#38bdf8" opacity=".05"/>
+  </g>
+
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="44" y="49" fill="#fde68a" font-size="14" font-weight="700" letter-spacing="2">BLACK FRIDAY + CYBER MONDAY</text>
+    <text x="44" y="112" fill="#f8fafc" font-size="44" font-weight="700">Start with Pro.</text>
+    <text x="44" y="169" fill="#7dd3fc" font-size="52" font-weight="700">Save 50%.</text>
+    <text x="44" y="207" fill="#cbd5e1" font-size="18">New licenses · First year only</text>
+    <text x="44" y="241" fill="#f8fafc" font-size="16">Nov 26, 6 p.m.–Nov 30, 11:59 p.m. PST (2026)</text>
+    <rect x="44" y="265" width="194" height="38" rx="9" fill="#7dd3fc"/>
+    <text x="141" y="290" fill="#082f49" text-anchor="middle" font-size="16" font-weight="700">View the offer →</text>
+
+    <rect x="598" y="30" width="558" height="270" rx="16" fill="#ffffff" fill-opacity=".04" stroke="#ffffff" stroke-opacity=".2"/>
+    <rect x="624" y="53" width="506" height="93" rx="10" fill="#020617" fill-opacity=".3" stroke="#7dd3fc" stroke-opacity=".5" stroke-dasharray="4 3"/>
+    <text x="877" y="81" fill="#bae6fd" text-anchor="middle" font-size="12" font-weight="700" letter-spacing="2">YOUR CHECKOUT CODE</text>
+    <text x="877" y="121" fill="#fef3c7" text-anchor="middle" font-family="Consolas, 'Liberation Mono', monospace" font-size="30" font-weight="700" letter-spacing="2">CYBERWEEK2026</text>
+
+    <text x="642" y="182" fill="#e2e8f0" font-size="16" font-weight="700">Pro Developer</text>
+    <text x="642" y="222" fill="#94a3b8" font-size="17">$99</text>
+    <line x1="640" y1="216" x2="675" y2="216" stroke="#94a3b8"/>
+    <text x="690" y="226" fill="#ffffff" font-size="34" font-weight="700">$49.50</text>
+    <line x1="869" y1="163" x2="869" y2="239" stroke="#ffffff" stroke-opacity=".2"/>
+    <text x="904" y="182" fill="#e2e8f0" font-size="16" font-weight="700">Pro Agency</text>
+    <text x="904" y="222" fill="#94a3b8" font-size="17">$299</text>
+    <line x1="902" y1="216" x2="946" y2="216" stroke="#94a3b8"/>
+    <text x="959" y="226" fill="#ffffff" font-size="34" font-weight="700">$149.50</text>
+    <line x1="624" y1="249" x2="1130" y2="249" stroke="#ffffff" stroke-opacity=".2"/>
+    <text x="624" y="277" fill="#cbd5e1" font-size="15">USD · New purchases only · Regular renewal prices apply.</text>
+  </g>
+</svg>
