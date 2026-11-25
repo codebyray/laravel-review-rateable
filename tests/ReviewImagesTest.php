@@ -204,7 +204,7 @@ it('cleans up image files when a review is deleted', function () {
 });
 
 it('waits for commit before deleting review files', function () {
-    $review = imageReview();
+    $review = imageReview()->load('images');
     $image = $review->addImage(UploadedFile::fake()->image('rollback.jpg'));
 
     DB::beginTransaction();
@@ -216,6 +216,63 @@ it('waits for commit before deleting review files', function () {
     Storage::disk('review-images-testing')->assertExists($image->path);
     expect(Review::query()->find($review->id))->not->toBeNull()
         ->and(ReviewImage::query()->find($image->id))->not->toBeNull();
+});
+
+it('cleans up images added after an empty relation was loaded', function () {
+    $review = imageReview()->load('images');
+    $image = $review->addImage(UploadedFile::fake()->image('later.jpg'));
+
+    expect($review->images)->toHaveCount(0);
+    $review->delete();
+
+    Storage::disk('review-images-testing')->assertMissing($image->path);
+    expect(ReviewImage::query()->count())->toBe(0);
+});
+
+it('cleans up every image when the loaded relation is filtered or incomplete', function () {
+    $review = imageReview();
+    $first = $review->addImage(UploadedFile::fake()->image('first.jpg'));
+    $second = $review->addImage(
+        UploadedFile::fake()->image('second.jpg'),
+        thumbnail: UploadedFile::fake()->image('thumb.jpg')
+    );
+    $review->load(['images' => fn ($query) => $query->whereKey($first->id)->select('id', 'review_id')]);
+
+    expect($review->images)->toHaveCount(1);
+    $review->delete();
+
+    Storage::disk('review-images-testing')->assertMissing([$first->path, $second->path, $second->thumbnail_path]);
+    expect(ReviewImage::query()->count())->toBe(0);
+});
+
+it('defers cleanup of images missing from a loaded relation until commit', function () {
+    $review = imageReview()->load('images');
+    $image = $review->addImage(UploadedFile::fake()->image('commit.jpg'));
+
+    DB::beginTransaction();
+    $review->delete();
+    Storage::disk('review-images-testing')->assertExists($image->path);
+    DB::commit();
+
+    Storage::disk('review-images-testing')->assertMissing($image->path);
+});
+
+it('can delete a review without the optional images table even with a loaded relation', function () {
+    $review = imageReview()->load('images');
+    Schema::drop('review_images');
+
+    expect($review->delete())->toBeTrue();
+});
+
+it('preserves review files when automatic cleanup is disabled', function () {
+    $review = imageReview();
+    $image = $review->addImage(UploadedFile::fake()->image('preserved-review.jpg'));
+    config()->set('review-rateable.images.delete_files_on_delete', false);
+
+    $review->delete();
+
+    Storage::disk('review-images-testing')->assertExists($image->path);
+    expect(ReviewImage::query()->count())->toBe(0);
 });
 
 it('can preserve files when automatic cleanup is disabled', function () {

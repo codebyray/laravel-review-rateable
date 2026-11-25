@@ -244,21 +244,20 @@ class Review extends Model
     protected static function booted(): void
     {
         static::deleting(function (Review $review) {
+            $review->imagesPendingDeletion = null;
+
             if (! config('review-rateable.images.delete_files_on_delete', true)) {
                 return;
             }
 
-            if (! $review->relationLoaded('images')) {
-                $schema = $review->getConnection()->getSchemaBuilder();
+            $schema = $review->getConnection()->getSchemaBuilder();
 
-                if (! $schema->hasTable((new ReviewImage)->getTable())) {
-                    return;
-                }
-
-                $review->load('images');
+            if (! $schema->hasTable((new ReviewImage)->getTable())) {
+                return;
             }
 
-            $review->imagesPendingDeletion = $review->images;
+            // A loaded relation may be stale, filtered, or missing file columns.
+            $review->imagesPendingDeletion = $review->images()->get();
         });
 
         static::deleted(function (Review $review) {
